@@ -1,0 +1,10 @@
+const express = require('express');
+const router = express.Router();
+const {roleVerifierForAdminAndForReviewer} = require("../middlewares/assignment");
+const {UserLoggedInOrNot} = require("../middlewares/authorisation");
+const {sendRequest , responseToRequest , giveReviewTheAssignmentAndNotAcceptIt , acceptTheAssignment} = require("../controllers/reviewer");
+router.post("/request" , UserLoggedInOrNot , sendRequest);
+router.post("/respond" , UserLoggedInOrNot , responseToRequest);
+router.post("/giveReview" , UserLoggedInOrNot , roleVerifierForAdminAndForReviewer , giveReviewTheAssignmentAndNotAcceptIt);
+router.post("/acceptAssignment" , UserLoggedInOrNot , roleVerifierForAdminAndForReviewer , acceptTheAssignment);
+module.exports = router;
