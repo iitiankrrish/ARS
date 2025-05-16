@@ -1,12 +1,14 @@
-import './App.css';
-import Sidebar from './components/Sidebar';
-import AssgnCard from './components/Card.js';
+import "./App.css";
+import Sidebar from "./components/Sidebar";
+import AssgnCard from "./components/Card.js";
+import Loginform from "./components/Loginform.js";
 
 function App() {
   return (
     <>
-      <Sidebar/>
-      <AssgnCard/>
+      {/* <Sidebar/> */}
+      {/* <AssgnCard/> */}
+      <Loginform />
     </>
   );
 }
