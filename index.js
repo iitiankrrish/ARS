@@ -6,6 +6,7 @@ const groupRoute = require('./routes/group');
 const assignmentRoute = require('./routes/assignment');
 const reviewerRoute = require("./routes/reviewer");
 const profileRoute = require("./routes/profile");
+const subtaskRoute = require("./routes/subtask");
 const { connectToMongoDB } = require('./connect');
 
 const app = express();
@@ -20,6 +21,7 @@ app.use("/group", groupRoute);
 app.use("/assignment", assignmentRoute);
 app.use("/reviewer" , reviewerRoute);
 app.use("/profile" , profileRoute);
+app.use("/subtask" , subtaskRoute);
 // Connect to MongoDB (Use .env instead of hardcoding)
 const mongoURI ="mongodb://127.0.0.1:27017/ARS";
 connectToMongoDB(mongoURI)

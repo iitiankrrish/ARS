@@ -15,7 +15,6 @@ async function createAssignment(req, res) {
     subtask,
   } = req.body;
   const createdBy = req.user._id;
-  console.log(req.body);
   // Check if either assignedToGroup or assignedToUser is provided
   if (!assignedToGroup && !assignedToUser) {
     return res
@@ -41,6 +40,15 @@ async function createAssignment(req, res) {
         Error:
           "Exactly same assignment already exists, you can add members to it but not create it again ... to create it ... delete it",
       });
+    }
+    //Create subtasks 
+    const arrayOfSubtaskId = [];
+    if(Array.isArray(subtask)){
+      for(const subtaskObject of subtask){
+        const {title,description} = subtaskObject;
+        const schemaStorage = await Subtask.create({title , description,dueDate});
+        arrayOfSubtaskId.push(schemaStorage._id);
+      }
     }
     // Set the assigned date to the current time
     const assignedDate = Date.now();
@@ -78,18 +86,16 @@ async function createAssignment(req, res) {
       if (!group) {
         return res.status(404).json({ error: "Group not found." });
       }
-      console.log("Before adding users:", membersStatus);
+      
 
       // Add all members of the group with 'pending' status
       for (const member of group.members) {
-        console.log("Adding user:", member);
 
         // Check if the user is already in membersStatus
         const isAlreadyAdded = membersStatus.some(
           (status) =>
             status.userId && status.userId.toString() === member?.toString()
         );
-        console.log("After adding users:", membersStatus);
 
         if (!isAlreadyAdded) {
           // Fetch user role to check if they are a reviewee
@@ -105,13 +111,13 @@ async function createAssignment(req, res) {
         }
       }
     }
-    let filesData = [];
-    if (req.files && req.files.length > 0) {
-      filesData = req.files.map((file) => ({
-        filePath: file.path, // Path where the file is stored (from multer)
-        fileName: file.originalname, // Original file name
-      }));
-    }
+    // let filesData = [];
+    // if (req.files && req.files.length > 0) {
+    //   filesData = req.files.map((file) => ({
+    //     filePath: file.path, // Path where the file is stored (from multer)
+    //     fileName: file.originalname, // Original file name
+    //   }));
+    // }
     // Create the assignment document
     const newAssignment = await Assignment.create({
       title,
@@ -123,11 +129,14 @@ async function createAssignment(req, res) {
       membersStatus,
       status: "assigned",
       createdBy,
-      subtask,
-      reviewerAttachments: filesData,
+      subtask: arrayOfSubtaskId,//stored as arrays of id of subtask 
+      // reviewerAttachments: filesData,
     });
 
     const assignmentId = newAssignment._id;
+    for(const id of arrayOfSubtaskId){
+      await Subtask.findByIdAndUpdate(id , {assignmentId});
+    }
     await Reviewer.create({
       assignment: assignmentId,
       reviewers: [
@@ -163,11 +172,25 @@ async function submissionOfAssignment(req, res) {
     if (!assignment) {
       return res.json({ Error: "No such assignment exists" });
     }
+    const memberStatus = assignment.membersStatus.find(
+      (member) => member.userId.toString() === userId.toString()
+    );
+
+    if (!memberStatus) {
+      return res.json({
+        Error: "No such member exists either in group or individually who has been assigned this assignment",
+      });
+    }
+    if (assignment.dueDate < Date.now()) {
+      return res.json("You cannot submit after the due date");
+    }
 
     // Check if all subtasks are completed , har ek subtask ko lo and uske respective id mein jaake check if it is completed
-    const subtaskDocs = await Subtask.find({ _id: { $in: assignment.subtask } });
+    const subtaskDocs = await Subtask.find({
+      _id: { $in: assignment.subtask },
+    });
 
-    const allSubtasksCompleted = subtaskDocs.every(subtask => {
+    const allSubtasksCompleted = subtaskDocs.every((subtask) => {
       const userSubmission = subtask.submissions.find(
         (s) => s.userId.toString() === userId.toString()
       );
@@ -189,15 +212,7 @@ async function submissionOfAssignment(req, res) {
     // assignment.userAttachments.push(...filesData);
 
     // Ensure membersStatus exists and is an array
-    const memberStatus = assignment.membersStatus.find(
-      (member) => member.userId.toString() === userId.toString()
-    );
-
-    if (!memberStatus) {
-      return res.json({
-        Error: "No such member exists either in group or individually",
-      });
-    }
+    
     if (memberStatus.status == "submitted") {
       return res.json({
         Message: `Cannot submit because the assignment is ${memberStatus.status}`,
@@ -233,7 +248,7 @@ async function sendAssignment(req, res) {
 
   // Check if user email is available
   if (!userEmailId) {
-    return res.json({ Error: "Wrong email id of the user" });
+    return res.json({ Error: "No email id of the user" });
   }
 
   try {
@@ -242,7 +257,7 @@ async function sendAssignment(req, res) {
       service: "gmail",
       auth: {
         user: userEmailId,
-        pass: userPassword, // The password to authenticate the sender's email
+        pass: userPassword, // The app-password to authenticate the sender's email
       },
     });
 
@@ -438,16 +453,21 @@ async function groupSubmissionOfAssignment(req, res) {
 
   try {
     const Group = await Group.findById(groupId);
-    if(Group.captainId.toString() !== captainId.toString()){
-      return res.json({"Error":"You cannot submit this assignment as you are not the captain of the group"});
+    if (Group.captainId.toString() !== captainId.toString()) {
+      return res.json({
+        Error:
+          "You cannot submit this assignment as you are not the captain of the group",
+      });
     }
     const assignment = await Assignment.findOne({ _id: assignmentId });
     if (!assignment) {
       return res.json({ Error: "No such assignment exists" });
     }
     if (assignment.subtask.length > 0) {
-      const subtaskDocs = await Subtask.find({ _id: { $in: assignment.subtask } });
-      const allSubtasksCompleted = subtaskDocs.every(subtask => {
+      const subtaskDocs = await Subtask.find({
+        _id: { $in: assignment.subtask },
+      });
+      const allSubtasksCompleted = subtaskDocs.every((subtask) => {
         const groupSubmission = subtask.groupSubmissions.find(
           (g) => g.groupId.toString() === groupId.toString()
         );
@@ -477,7 +497,7 @@ async function groupSubmissionOfAssignment(req, res) {
 
     if (!groupSubmissionStatus) {
       return res.json({
-        Error: "No such group exists"
+        Error: "No such group exists",
       });
     }
     if (groupSubmissionStatus.status == "submitted") {
@@ -505,5 +525,5 @@ module.exports = {
   assignmentUnsubmission,
   addUserOrGroupToExistingAssignment,
   removeAssignment,
-  groupSubmissionOfAssignment
+  groupSubmissionOfAssignment,
 };

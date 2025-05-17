@@ -13,7 +13,13 @@ async function submitSubtask(req, res) {
     if (!subtask) {
       return res.json({ Error: "No such subtask exists" });
     }
+    
+   
 
+
+    if (subtask.dueDate < Date.now()) {
+      return res.json("You cannot submit after the due date");
+    }
     // Get the assignment associated with the subtask
     const assignmentId = subtask.assignmentId;
     const assignment = await Assignment.findById(assignmentId);
@@ -22,11 +28,9 @@ async function submitSubtask(req, res) {
     const assignedUser = assignment.membersStatus.find(
       (member) => member.userId.toString() === userId.toString()
     );
-
-    if (!assignedUser) {
+ if (!assignedUser) {
       return res.json({ Error: "You are not part of this assignment" });
     }
-
     // Check if the subtask has already been submitted by this user
     const existingSubmission = subtask.submissions.find(
       (submission) => submission.userId.toString() === userId.toString()
@@ -77,14 +81,17 @@ async function submitSubtask(req, res) {
   }
 }
 async function submitSubtaskForGroup(req, res) {
-  const { subtaskId } = req.params;
+  const { subtaskId , groupId } = req.params;
   const captainId = req.user._id;
-  const { groupId } = req.body;
   try {
     // Find the subtask by its ID
     const subtask = await Subtask.findById(subtaskId);
     if (!subtask) {
       return res.json({ Error: "No such subtask exists" });
+    }
+    
+    if (subtask.dueDate < Date.now()) {
+      return res.json("You cannot submit after the due date");
     }
     const Group = await Group.findById(groupId);
     if(Group.captainId.toString() !== captainId.toString()){
@@ -162,4 +169,5 @@ async function submitSubtaskForGroup(req, res) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+
 module.exports = { submitSubtask , submitSubtaskForGroup};

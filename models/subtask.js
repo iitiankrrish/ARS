@@ -11,7 +11,16 @@ const subtaskSchema = new mongoose.Schema({
     },
     assignmentId: {
         type: mongoose.Schema.Types.ObjectId,
+    },
+    dueDate:{
+        type: Date,
         required: true,
+        validate:{
+            validator: function(value){
+                return value.getTime() > Date.now();
+            },
+            message: "Due date has to be of the future"
+        }
     },
     status: {
         type: String,
