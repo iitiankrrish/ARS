@@ -95,11 +95,17 @@ async function showAnyProfile(req, res) {
       });
     });
 
+    const pendingAssignmentslength = pendingAssignments.length;
+    const reviewedAssignmentslength = reviewedAssignments.length;
+    const acceptedAssignmentslength = acceptedAssignments.length;
     const userInfoObject = {
       basicUserInfo,
+      pendingAssignmentslength,
+      reviewedAssignmentslength,
+      acceptedAssignmentslength,
       pendingAssignments,
       reviewedAssignments,
-      acceptedAssignments,
+      acceptedAssignments
     };
 
     return res.json(userInfoObject);
@@ -150,11 +156,14 @@ async function showProfileOfAssignedStudents(req, res) {
       });
     });
 
+    const pendingAssignmentslength = pendingAssignments.length;
+    const reviewedAssignmentslength = reviewedAssignments.length;
+    const acceptedAssignmentslength = acceptedAssignments.length;
     const userInfoObject = {
       basicUserInfo,
-      pendingAssignments,
-      reviewedAssignments,
-      acceptedAssignments,
+      pendingAssignmentslength,
+      reviewedAssignmentslength,
+      acceptedAssignmentslength,
     };
 
     return res.json(userInfoObject);

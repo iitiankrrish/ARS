@@ -42,7 +42,7 @@ const {roleVerifierForAdminAndForReviewer} = require('../middlewares/assignment'
 router.post("/create", UserLoggedInOrNot,roleVerifierForAdminAndForReviewer,upload,createAssignment);
 router.post("/submit/:assignmentId", UserLoggedInOrNot,upload,submissionOfAssignment);
 router.post("/send/:assignmentId", UserLoggedInOrNot,sendAssignment);
-router.post("/send/:assignmentId", UserLoggedInOrNot,assignmentUnsubmission);
+router.post("/unsubmit/:assignmentId", UserLoggedInOrNot,assignmentUnsubmission);
 router.post("/add/:assignmentId", UserLoggedInOrNot,addUserOrGroupToExistingAssignment);
 router.post("/remove/:assignmentId", UserLoggedInOrNot,removeAssignment);
 module.exports = router;
