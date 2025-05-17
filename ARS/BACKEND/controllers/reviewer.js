@@ -169,7 +169,6 @@ async function giveReviewTheAssignmentAndNotAcceptIt(req, res) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
-
 async function acceptTheAssignment(req, res) {
   try {
     const { assignmentId, studentId } = req.params;
