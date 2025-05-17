@@ -36,8 +36,9 @@ const router = express.Router();
 //   },
 //   fileFilter: fileFilter
 // }).array('attachments', 5); // Limit to 5 files
-
-const {submitSubtask , submitSubtaskForGroup} = require('../controllers/subtask');
+const {submitSubtask , submitSubtaskForGroup , unsubmitSubtask , unsubmitSubtaskforGroup} = require('../controllers/subtask');
 router.post("/submit/:subtaskId", UserLoggedInOrNot,submitSubtask);
-router.post("/submit/:groupId/:subtaskId", UserLoggedInOrNot,submitSubtask);
+router.post("/submit/:groupId/:subtaskId", UserLoggedInOrNot,submitSubtaskForGroup);
+router.post("/unsubmit/:subtaskId", UserLoggedInOrNot,unsubmitSubtask);
+router.post("/unsubmit/:groupId/:subtaskId", UserLoggedInOrNot,unsubmitSubtaskforGroup);
 module.exports = router;

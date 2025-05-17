@@ -135,19 +135,21 @@ async function giveReviewTheAssignmentAndNotAcceptIt(req, res) {
     if (!assignment) {
       return res.status(404).json({ error: "Assignment not found" });
     }
-    if(student.status != "submitted"){
-      return res.json({"Error":"You cannot review a pre-evaluated or an unsubmitted assignment"});
-    }
-
+   
     // Find student in the assignment's membersStatus
     const student = assignment.membersStatus.find(
       (s) => s.userId.toString() === studentId
     );
+    
     if (!student) {
       return res
         .status(404)
         .json({ error: "Student not found in this assignment" });
     }
+     if(student.status != "submitted"){
+      return res.json({"Error":"You cannot review a pre-evaluated or an unsubmitted assignment"});
+    }
+
     assignment.reviewCount = assignment.reviewCount +1;
 
     // Add review to student's reviews
@@ -186,6 +188,9 @@ async function acceptTheAssignment(req, res) {
       return res
         .status(404)
         .json({ error: "Student not found in this assignment" });
+    }
+    if(student.status !== "submitted"){
+      return res.json("You cannot accept a pending or pre-accepted assignment");
     }
 
     student.status = "accepted"; // Mark as accepted

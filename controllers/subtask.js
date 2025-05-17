@@ -13,9 +13,6 @@ async function submitSubtask(req, res) {
     if (!subtask) {
       return res.json({ Error: "No such subtask exists" });
     }
-    
-   
-
 
     if (subtask.dueDate < Date.now()) {
       return res.json("You cannot submit after the due date");
@@ -28,7 +25,7 @@ async function submitSubtask(req, res) {
     const assignedUser = assignment.membersStatus.find(
       (member) => member.userId.toString() === userId.toString()
     );
- if (!assignedUser) {
+    if (!assignedUser) {
       return res.json({ Error: "You are not part of this assignment" });
     }
     // Check if the subtask has already been submitted by this user
@@ -81,7 +78,7 @@ async function submitSubtask(req, res) {
   }
 }
 async function submitSubtaskForGroup(req, res) {
-  const { subtaskId , groupId } = req.params;
+  const { subtaskId, groupId } = req.params;
   const captainId = req.user._id;
   try {
     // Find the subtask by its ID
@@ -89,13 +86,16 @@ async function submitSubtaskForGroup(req, res) {
     if (!subtask) {
       return res.json({ Error: "No such subtask exists" });
     }
-    
+
     if (subtask.dueDate < Date.now()) {
       return res.json("You cannot submit after the due date");
     }
     const Group = await Group.findById(groupId);
-    if(Group.captainId.toString() !== captainId.toString()){
-      return res.json({"Error":"You cannot submit this assignment as you are not the captain of the group"});
+    if (Group.captainId.toString() !== captainId.toString()) {
+      return res.json({
+        Error:
+          "You cannot submit this assignment as you are not the captain of the group",
+      });
     }
 
     // Get the assignment associated with the subtask
@@ -154,10 +154,9 @@ async function submitSubtaskForGroup(req, res) {
       const groupSubmission = subtask.groupSubmissions.find(
         (gs) => gs.groupId.toString() === groupId.toString()
       );
-
       return groupSubmission && groupSubmission.status === "submitted";
     });
-    if(allSubmitted){
+    if (allSubmitted) {
       assignedGroup.status = "submitted";
       await assignment.save();
     }
@@ -169,5 +168,116 @@ async function submitSubtaskForGroup(req, res) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+async function unsubmitSubtask(req, res) {
+  const { subtaskId } = req.params;
+  const userId = req.user._id;
 
-module.exports = { submitSubtask , submitSubtaskForGroup};
+  try {
+    // Find the assignment
+    const subtask = await Subtask.findById(subtaskId);
+
+    if (!subtask) {
+      return res.status(404).json({ error: "Subtask not found" });
+    }
+    const assignmentId = subtask.assignmentId;
+    const assignment = await Assignment.findById(assignmentId);
+    // Find the student in the membersStatus array
+    const student = assignment.membersStatus.find(
+      (member) => member.userId.toString() === userId.toString()
+    );
+    const studentSubtaskDocument = subtask.submissions.find(
+      (member) => member.userId.toString() === userId.toString()
+    );
+    // Check if the student is found and their status is "submitted"
+    if (!student) {
+      return res
+        .status(404)
+        .json({ error: "You are not assigned this subtask" });
+    }
+    if (!studentSubtaskDocument && student || studentSubtaskDocument.status === "pending") {
+      return res.json({ Error: "You cannot unsubmit a pending task" });
+    }
+
+    if (studentSubtaskDocument.status === "submitted") {
+      studentSubtaskDocument.status = "pending"; // Change the status to "pending"
+    }
+    student.status = "pending";
+    await assignment.save();
+    // Save the assignment after updating the student's status
+    await subtask.save();
+
+    // Send success response
+    res.status(200).json({ message: "Subtask unsubmitted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+async function unsubmitSubtaskforGroup(req, res) {
+  const { subtaskId, groupId } = req.params;
+  const captainId = req.user._id;
+
+  try {
+    const Group = await Group.findById(groupId);
+    if (Group.captainId.toString() !== captainId.toString()) {
+      return res.json({
+        Error:
+          "You cannot submit this assignment as you are not the captain of the group",
+      });
+    }
+    // Find the assignment
+    const subtask = await Subtask.findById(subtaskId);
+
+    if (!subtask) {
+      return res.status(404).json({ error: "Subtask not found" });
+    }
+    const assignmentId = subtask.assignmentId;
+    const assignment = await Assignment.findById(assignmentId);
+    // Find the student in the membersStatus array
+    const student = assignment.membersStatus.find(
+      (member) => member.userId.toString() === captainId.toString()
+    );
+    const groupSubtaskDocument = subtask.groupSubmissions.find(
+      (member) => member.userId.toString() === groupId.toString()
+    );
+    // Check if the student is found and their status is "submitted"
+    if (!student) {
+      return res
+        .status(404)
+        .json({ error: "This assignment is not assigned to your group" });
+    }
+    if (!groupSubtaskDocument && student || groupSubtaskDocument.status === "pending") {
+      return res.json({ Error: "You cannot unsubmit a pending task" });
+    }
+
+    if (groupSubtaskDocument.status === "submitted") {
+      studentSubtaskDocument.status = "pending"; // Change the status to "pending"
+    }
+    const membersOfGroup = Group.members;
+    for (const member of membersOfGroup) {
+      const student = assignment.membersStatus.find(
+        (individual) => individual.userId.toString() === member.toString()
+      );
+      student.status = "pending";
+    }
+    const group = assignment.groupSubmissionStatus.find(
+        (individualgroup) => individualgroup.groupId.toString() === groupId.toString()
+      );
+      group.status = "pending";
+    // Save the assignment after updating the student's status
+    await assignment.save();
+    await subtask.save();
+
+    // Send success response
+    res.status(200).json({ message: "Subtask unsubmitted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+module.exports = {
+  submitSubtask,
+  submitSubtaskForGroup,
+  unsubmitSubtask,
+  unsubmitSubtaskforGroup,
+};

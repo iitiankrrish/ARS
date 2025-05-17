@@ -5,6 +5,6 @@ const {UserLoggedInOrNot} = require("../middlewares/authorisation");
 const {sendRequest , responseToRequest , giveReviewTheAssignmentAndNotAcceptIt , acceptTheAssignment} = require("../controllers/reviewer");
 router.post("/request" , UserLoggedInOrNot , sendRequest);
 router.post("/respond" , UserLoggedInOrNot , responseToRequest);
-router.post("/giveReview" , UserLoggedInOrNot , roleVerifierForAdminAndForReviewer , giveReviewTheAssignmentAndNotAcceptIt);
-router.post("/acceptAssignment" , UserLoggedInOrNot , roleVerifierForAdminAndForReviewer , acceptTheAssignment);
+router.post("/giveReview/:studentId/:assignmentId" , UserLoggedInOrNot , roleVerifierForAdminAndForReviewer , giveReviewTheAssignmentAndNotAcceptIt);
+router.post("/acceptAssignment/:studentId/:assignmentId" , UserLoggedInOrNot , roleVerifierForAdminAndForReviewer , acceptTheAssignment);
 module.exports = router;
