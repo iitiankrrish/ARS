@@ -22,6 +22,5 @@ const reviewerSchema = new mongoose.Schema({
     }
   ]
 });
-
 const Reviewer = new mongoose.model("Reviewer", reviewerSchema);
 module.exports = Reviewer;

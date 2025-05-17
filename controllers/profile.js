@@ -1,4 +1,5 @@
 const Assignment = require("../models/assignment");
+const Reviewer = require("../models/reviewer");
 const User = require("../models/user");
 
 async function getMyProfile(req, res) {
@@ -6,7 +7,6 @@ async function getMyProfile(req, res) {
     const role = req.user.role;
     const basicUserInfo = req.user;
     const allAssignments = await Assignment.find({});
-
     let pendingAssignments = [];
     let reviewedAssignments = [];
     let acceptedAssignments = [];
@@ -18,34 +18,45 @@ async function getMyProfile(req, res) {
           if (member.userId.toString() === req.user._id.toString()) {
             if (member.status === "pending")
               pendingAssignments.push(assignment);
-            if (member.status === "submitted")
+            else if (member.status === "submitted")
               reviewedAssignments.push(assignment);
-            if (member.status === "accepted")
+            else if (member.status === "accepted")
               acceptedAssignments.push(assignment);
           }
         });
       });
     } else if (role === "reviewer") {
+      const assignmentsToReviewer = await Reviewer.find({
+        "reviewers.userId": basicUserInfo._id,
+      });
       // For Reviewers: Get assignments from reviewersStatus
-      allAssignments.forEach((assignment) => {
-        assignment.reviewersStatus.forEach((reviewer) => {
-          if (reviewer.userId.toString() === req.user._id.toString()) {
-            if (reviewer.status === "pending")
-              pendingAssignments.push(assignment);
-            if (reviewer.status === "reviewed")
-              reviewedAssignments.push(assignment);
-            if (reviewer.status === "accepted")
-              acceptedAssignments.push(assignment);
+      assignmentsToReviewer.forEach((assignmentForEach) => {
+        const assignmentIdforEach = assignmentForEach.assignment;
+        allAssignments.forEach((individualAssignment) => {
+          if (
+            individualAssignment._id.toString() ===
+            assignmentIdforEach.toString()
+          ) {
+            individualAssignment.membersStatus.forEach((member) => {
+              if (member.status === "pending")
+                pendingAssignments.push(individualAssignment);
+              else if (member.status === "submitted")
+                reviewedAssignments.push(individualAssignment);
+              else if (member.status === "accepted")
+                acceptedAssignments.push(individualAssignment);
+            });
           }
         });
       });
     }
-
+    const pendingAssignmentslength = pendingAssignments.length;
+    const reviewedAssignmentslength = reviewedAssignments.length;
+    const acceptedAssignmentslength = acceptedAssignments.length;
     const userInfoObject = {
       basicUserInfo,
-      pendingAssignments,
-      reviewedAssignments,
-      acceptedAssignments,
+      pendingAssignmentslength,
+      reviewedAssignmentslength,
+      acceptedAssignmentslength,
     };
 
     return res.json(userInfoObject);
