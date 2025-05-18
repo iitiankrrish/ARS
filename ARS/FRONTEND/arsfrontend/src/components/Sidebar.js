@@ -43,7 +43,11 @@ function Sidebar({ username }) {
 
   const handleLogout = async () => {
     try {
-      const res = await axios.post("/user/logout", {}, { withCredentials: true });
+      const res = await axios.post(
+        "/user/logout",
+        {},
+        { withCredentials: true }
+      );
       console.log("Logout successful:", res);
       navigate("/user/login"); // Redirect to login page
     } catch (err) {
@@ -61,12 +65,46 @@ function Sidebar({ username }) {
     { icon: <People />, label: "CREATE GROUP" },
     { icon: <GroupAdd />, label: "JOIN GROUP" },
   ];
+  const allassignmentclick = () => {
+    try {
+      navigate("/assignment/allassignment");
+      console.log("switched to all assignments page")
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  const viewprofilechange = () => {
+    try {
+      navigate("/profile/user");
+      console.log("switched to all assignments page")
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  const pendingassignmentclick = () => {
+    try {
+      navigate("/assignment/pendingassignment");
+      console.log("switched to all assignments page")
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  const accepetedassignmentclick = () => {
+    try {
+      navigate("/assignment/reviewedassignment");
+      console.log("switched to all assignments page")
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   return (
     <ThemeProvider theme={theme}>
       <Box
         sx={{
-          width: 300,
+          wordBreak: "break-word", // or "break-all"
+          whiteSpace: "normal", // allows wrapping
+          width: "300px",
           height: "100vh",
           bgcolor: theme.palette.background.sidebarbg,
           display: "flex",
@@ -111,42 +149,103 @@ function Sidebar({ username }) {
 
         {/* Sidebar Menu */}
         <Box sx={{ display: "flex", flexDirection: "column", marginTop: 2 }}>
-          {menuItems.map((item, index) => (
-            <Box
-              key={index}
+          {/* HOME */}
+          <Box
+            onClick={allassignmentclick}
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              paddingLeft: 4,
+              color: "white",
+              "&:hover": {
+                bgcolor: theme.palette.background.hovercolor,
+                cursor: "pointer",
+                color: theme.palette.cta.main,
+              },
+              paddingTop: 2,
+              paddingBottom: 2,
+            }}
+          >
+            <HomeFilled sx={{ fontSize: "30px", color: "inherit" }} />
+            <Typography
+              variant="h3"
               sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "10px",
-                paddingLeft: 4,
-                color: "white",
-                "&:hover": {
-                  bgcolor: theme.palette.background.hovercolor,
-                  cursor: "pointer",
-                  color: theme.palette.cta.main,
-                },
-                paddingTop: 2,
-                paddingBottom: 2,
+                fontWeight: 900,
+                color: "inherit",
+                fontFamily: "Inter",
+                fontSize: "17px",
               }}
             >
-              {React.cloneElement(item.icon, {
-                sx: { fontSize: "30px", color: "inherit" },
-              })}
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: 900,
-                  color: "inherit",
-                  fontFamily: "Inter",
-                  fontSize: "17px",
-                }}
-              >
-                {item.label}
-              </Typography>
-            </Box>
-          ))}
+              HOME
+            </Typography>
+          </Box>
 
-          {/* Logout */}
+          {/* REVIEWED */}
+          <Box
+          onClick = {accepetedassignmentclick}
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              paddingLeft: 4,
+              color: "white",
+              "&:hover": {
+                bgcolor: theme.palette.background.hovercolor,
+                cursor: "pointer",
+                color: theme.palette.cta.main,
+              },
+              paddingTop: 2,
+              paddingBottom: 2,
+            }}
+          >
+            <CheckCircleOutline sx={{ fontSize: "30px", color: "inherit" }} />
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 900,
+                color: "inherit",
+                fontFamily: "Inter",
+                fontSize: "17px",
+              }}
+            >
+              REVIEWED
+            </Typography>
+          </Box>
+
+          {/* UNREVIEWED */}
+          <Box
+            onClick = {pendingassignmentclick}
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              paddingLeft: 4,
+              color: "white",
+              "&:hover": {
+                bgcolor: theme.palette.background.hovercolor,
+                cursor: "pointer",
+                color: theme.palette.cta.main,
+              },
+              paddingTop: 2,
+              paddingBottom: 2,
+            }}
+          >
+            <HelpOutline sx={{ fontSize: "30px", color: "inherit" }} />
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 900,
+                color: "inherit",
+                fontFamily: "Inter",
+                fontSize: "17px",
+              }}
+            >
+              PENDING
+            </Typography>
+          </Box>
+
+          {/* MESSAGES */}
           <Box
             sx={{
               display: "inline-flex",
@@ -162,8 +261,8 @@ function Sidebar({ username }) {
               paddingTop: 2,
               paddingBottom: 2,
             }}
-            onClick={handleLogout}
           >
+            <Email sx={{ fontSize: "30px", color: "inherit" }} />
             <Typography
               variant="h3"
               sx={{
@@ -173,11 +272,170 @@ function Sidebar({ username }) {
                 fontSize: "17px",
               }}
             >
-              LOGOUT
+              MESSAGES
             </Typography>
           </Box>
+
+          {/* VIEW PROFILE */}
+          <Box
+          onClick = {viewprofilechange}
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              paddingLeft: 4,
+              color: "white",
+              "&:hover": {
+                bgcolor: theme.palette.background.hovercolor,
+                cursor: "pointer",
+                color: theme.palette.cta.main,
+              },
+              paddingTop: 2,
+              paddingBottom: 2,
+            }}
+          >
+            <PersonOutline sx={{ fontSize: "30px", color: "inherit" }} />
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 900,
+                color: "inherit",
+                fontFamily: "Inter",
+                fontSize: "17px",
+              }}
+            >
+              VIEW PROFILE
+            </Typography>
+          </Box>
+
+          {/* REQUESTS */}
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              paddingLeft: 4,
+              color: "white",
+              "&:hover": {
+                bgcolor: theme.palette.background.hovercolor,
+                cursor: "pointer",
+                color: theme.palette.cta.main,
+              },
+              paddingTop: 2,
+              paddingBottom: 2,
+            }}
+          >
+            <AlternateEmail sx={{ fontSize: "30px", color: "inherit" }} />
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 900,
+                color: "inherit",
+                fontFamily: "Inter",
+                fontSize: "17px",
+              }}
+            >
+              REQUESTS
+            </Typography>
+          </Box>
+
+          {/* CREATE GROUP */}
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              paddingLeft: 4,
+              color: "white",
+              "&:hover": {
+                bgcolor: theme.palette.background.hovercolor,
+                cursor: "pointer",
+                color: theme.palette.cta.main,
+              },
+              paddingTop: 2,
+              paddingBottom: 2,
+            }}
+          >
+            <People sx={{ fontSize: "30px", color: "inherit" }} />
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 900,
+                color: "inherit",
+                fontFamily: "Inter",
+                fontSize: "17px",
+              }}
+            >
+              CREATE GROUP
+            </Typography>
+          </Box>
+
+          {/* JOIN GROUP */}
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              paddingLeft: 4,
+              color: "white",
+              "&:hover": {
+                bgcolor: theme.palette.background.hovercolor,
+                cursor: "pointer",
+                color: theme.palette.cta.main,
+              },
+              paddingTop: 2,
+              paddingBottom: 2,
+            }}
+          >
+            <GroupAdd sx={{ fontSize: "30px", color: "inherit" }} />
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 900,
+                color: "inherit",
+                fontFamily: "Inter",
+                fontSize: "17px",
+              }}
+            >
+              JOIN GROUP
+            </Typography>
+          </Box>
+
+          {/* LOGOUT (already present below, keep as is) */}
+        </Box>
+
+        {/* Logout */}
+        <Box
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+            paddingLeft: 4,
+            color: "white",
+            "&:hover": {
+              bgcolor: theme.palette.background.hovercolor,
+              cursor: "pointer",
+              color: theme.palette.cta.main,
+            },
+            paddingTop: 2,
+            paddingBottom: 2,
+          }}
+          onClick={handleLogout}
+        >
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 900,
+              color: "inherit",
+              fontFamily: "Inter",
+              fontSize: "17px",
+            }}
+          >
+            LOGOUT
+          </Typography>
         </Box>
       </Box>
+
     </ThemeProvider>
   );
 }

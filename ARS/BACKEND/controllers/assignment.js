@@ -530,7 +530,9 @@ async function getpendingassignments(req, res) {
 
     allAssignments.forEach((assignment) => {
       const matchingMember = assignment.membersStatus.find(
-        (member) => member.userId.toString() === studentId.toString() && member.status === "pending"
+        (member) =>
+          member.userId.toString() === studentId.toString() &&
+          member.status === "pending"
       );
 
       if (matchingMember) {
@@ -538,6 +540,10 @@ async function getpendingassignments(req, res) {
           title: assignment.title,
           description: assignment.description,
           dueDate: assignment.dueDate,
+          title: assignment.title,
+
+          id: assignment._id,
+
           status: matchingMember.status,
         });
       }
@@ -562,11 +568,12 @@ async function getallassignments(req, res) {
       const memberstatus = assignment.membersStatus;
 
       for (const member of memberstatus) {
-        if ( member.userId.toString() === studentId.toString()) {
+        if (member.userId.toString() === studentId.toString()) {
           allmyassignmentobject.push({
             title: assignment.title,
             description: assignment.description,
             dueDate: assignment.dueDate,
+            id: assignment._id,
             status: member.status,
           });
         }
@@ -580,7 +587,7 @@ async function getallassignments(req, res) {
   }
 }
 
-async function getreviewedassignments(req, res) { 
+async function getreviewedassignments(req, res) {
   const { studentId } = req.params;
 
   try {
@@ -590,7 +597,9 @@ async function getreviewedassignments(req, res) {
 
     allAssignments.forEach((assignment) => {
       const matchingMember = assignment.membersStatus.find(
-        (member) =>  member.userId.toString() === studentId.toString() && member.status === "submitted"
+        (member) =>
+          member.userId.toString() === studentId.toString() &&
+          member.status === "submitted"
       );
 
       if (matchingMember) {
@@ -598,6 +607,7 @@ async function getreviewedassignments(req, res) {
           title: assignment.title,
           description: assignment.description,
           dueDate: assignment.dueDate,
+          id: assignment._id,
           status: matchingMember.status,
         });
       }
@@ -609,8 +619,8 @@ async function getreviewedassignments(req, res) {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }
-async function getacceptedassignments(req, res) { 
-    const { studentId } = req.params;
+async function getacceptedassignments(req, res) {
+  const { studentId } = req.params;
 
   try {
     const allAssignments = await Assignment.find({}).lean(); // lean = better perf
@@ -619,7 +629,9 @@ async function getacceptedassignments(req, res) {
 
     allAssignments.forEach((assignment) => {
       const matchingMember = assignment.membersStatus.find(
-        (member) =>  member.userId.toString() === studentId.toString() && member.status === "accepted"
+        (member) =>
+          member.userId.toString() === studentId.toString() &&
+          member.status === "accepted"
       );
 
       if (matchingMember) {
@@ -627,6 +639,7 @@ async function getacceptedassignments(req, res) {
           title: assignment.title,
           description: assignment.description,
           dueDate: assignment.dueDate,
+          id: assignment._id,
           status: matchingMember.status,
         });
       }
@@ -636,6 +649,22 @@ async function getacceptedassignments(req, res) {
   } catch (err) {
     console.error("Error fetching assignments:", err);
     return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+async function getselectedassignmentinfo(req, res) {
+  try {
+    const { id } = req.params;
+
+    const allAssignments = await Assignment.find({});
+
+    for (const assignment of allAssignments) {
+      if (assignment._id.toString() === id.toString()) {
+        return res.json(assignment);
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching assignment:", error);
+    res.status(500).json({ message: "Server error" });
   }
 }
 
@@ -650,5 +679,6 @@ module.exports = {
   getpendingassignments,
   getacceptedassignments,
   getreviewedassignments,
-  getallassignments
+  getallassignments,
+  getselectedassignmentinfo,
 };

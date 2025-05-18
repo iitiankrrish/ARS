@@ -4,11 +4,11 @@ import Sidebar from "../components/Sidebar";
 import AssgnCard from "../components/Card"; // Make sure this is AssgnCard
 import { Box } from "@mui/material";
 
-function Allassignment() {
-  const [allassignmentlist, setallassignmentlist] = useState([]);
+function Pendingassignment() {
+  const [pendingassignmentlist, setpendingassignmentlist] = useState([]);
   const [userdata, setUserdata] = useState(null);
 
-  async function extractallassignments() {
+  async function extractpendingassignments() {
     try {
       const response = await axios.get("/profile/user", {
         withCredentials: true,
@@ -17,16 +17,16 @@ function Allassignment() {
       setUserdata(response.data.basicUserInfo);
 
       const assignmentresponse = await axios.get(
-        `/assignment/getallassignments/${_id}`
+        `/assignment/getpendingassignments/${_id}`
       );
-      setallassignmentlist(assignmentresponse.data);
+      setpendingassignmentlist(assignmentresponse.data);
     } catch (error) {
       console.error("Error fetching the assignments:", error);
     }
   }
 
   useEffect(() => {
-    extractallassignments();
+    extractpendingassignments();
   }, []);
 
   if (!userdata) return <h2>Loading ...</h2>;
@@ -45,7 +45,7 @@ function Allassignment() {
           gap: 2,
         }}
       >
-        {allassignmentlist.map((assignment) => (
+        {pendingassignmentlist.map((assignment) => (
           <AssgnCard
             title={assignment.title}
             description={assignment.description}
@@ -59,4 +59,4 @@ function Allassignment() {
   );
 }
 
-export default Allassignment;
+export default Pendingassignment;

@@ -4,11 +4,11 @@ import Sidebar from "../components/Sidebar";
 import AssgnCard from "../components/Card"; // Make sure this is AssgnCard
 import { Box } from "@mui/material";
 
-function Allassignment() {
-  const [allassignmentlist, setallassignmentlist] = useState([]);
+function Reviewedassignment() {
+  const [reviewedassignmentlist, setreviewedassignmentlist] = useState([]);
   const [userdata, setUserdata] = useState(null);
 
-  async function extractallassignments() {
+  async function extractreviewedassignments() {
     try {
       const response = await axios.get("/profile/user", {
         withCredentials: true,
@@ -17,22 +17,22 @@ function Allassignment() {
       setUserdata(response.data.basicUserInfo);
 
       const assignmentresponse = await axios.get(
-        `/assignment/getallassignments/${_id}`
+        `/assignment/getacceptedassignments/${_id}`
       );
-      setallassignmentlist(assignmentresponse.data);
+      setreviewedassignmentlist(assignmentresponse.data);
     } catch (error) {
-      console.error("Error fetching the assignments:", error);
+      console.error("Error fetching reviewed assignments:", error);
     }
   }
 
   useEffect(() => {
-    extractallassignments();
+    extractreviewedassignments();
   }, []);
 
   if (!userdata) return <h2>Loading ...</h2>;
 
   const { username } = userdata;
-
+  // console.log(id);
   return (
     <Box sx={{ display: "flex", width: "100vw", bgcolor: "#121212" }}>
       <Sidebar username={username} />
@@ -45,13 +45,13 @@ function Allassignment() {
           gap: 2,
         }}
       >
-        {allassignmentlist.map((assignment) => (
+        {reviewedassignmentlist.map((assignment) => (
           <AssgnCard
             title={assignment.title}
             description={assignment.description}
             dueDate={assignment.dueDate}
             status={assignment.status}
-            id = {assignment.id}
+            id = {assignment._id}
           />
         ))}
       </Box>
@@ -59,4 +59,4 @@ function Allassignment() {
   );
 }
 
-export default Allassignment;
+export default Reviewedassignment;

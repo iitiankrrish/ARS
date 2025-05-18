@@ -53,9 +53,9 @@ function Profile() {
           <h1>Email: {email}</h1>
           <h1>Role: {role}</h1>
           <h1>Phone: {phoneNumber}</h1>
-          <h1>Submitted Assignments: {acceptedAssignmentlength}</h1>
+          <h1>Submitted Assignments: {reviewedAssignmentlength}</h1>
           <h1>Pending Assignments: {pendingAssignmentlength}</h1>
-          <h1>Accepted Assignements: {reviewedAssignmentlength}</h1>
+          <h1>Accepted Assignements: {acceptedAssignmentlength}</h1>
         </main>
       </Box>
     </>
