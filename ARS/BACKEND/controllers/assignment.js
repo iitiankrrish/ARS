@@ -165,7 +165,7 @@ async function submissionOfAssignment(req, res) {
   if (role !== "reviewee") {
     return res.json({ Error: "Only reviewee can submit the assignment" });
   }
-
+  const { comment, iterationNumber } = req.body;
   const { assignmentId } = req.params;
 
   try {
@@ -221,10 +221,18 @@ async function submissionOfAssignment(req, res) {
         Message: `Cannot submit because the assignment is ${memberStatus.status}`,
       });
     }
-
+    console.log(memberStatus);
     // Update the status of the user to "submitted"
     memberStatus.status = "submitted";
+    memberStatus.revieweeComments = [
+      ...(memberStatus.revieweeComments || []),
+      { comment, iterationNumber },
+    ];
+    console.log(memberStatus.revieweeComments);
+    console.log(memberStatus);
+
     memberStatus.submittedAt = Date.now();
+    assignment.markModified('membersStatus');
     await assignment.save(); // Save the assignment after the update
 
     res.status(200).json({ message: "Assignment submitted successfully" });
@@ -446,7 +454,8 @@ async function removeAssignment(req, res) {
 async function groupSubmissionOfAssignment(req, res) {
   const captainId = req.user._id;
   const role = req.user.role;
-  const { groupId } = req.body;
+  // const { comment, iterationNumber } = req.body;
+  const { groupId, comment, iterationNumber } = req.body;
   // Ensure only reviewees can submit the assignment
   if (role !== "reviewee") {
     return res.json({ Error: "Only reviewee can submit the assignment" });
@@ -510,8 +519,13 @@ async function groupSubmissionOfAssignment(req, res) {
     }
 
     // Update the status of the user to "submitted"
+    groupSubmissionStatus.revieweeComments = [
+      ...(groupSubmissionStatus.revieweeComments || []),
+      { comment, iterationNumber },
+    ];
     groupSubmissionStatus.status = "submitted";
     groupSubmissionStatus.submittedAt = Date.now();
+    assignment.markModified('groupSubmissionStatus');
     await assignment.save(); // Save the assignment after the update
 
     res.status(200).json({ message: "Assignment submitted successfully" });

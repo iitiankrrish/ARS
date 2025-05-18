@@ -80,7 +80,8 @@ async function handleLogOut(req, res) {
 async function askForReview(req, res) {
   try {
     const { reviewerIds, assignmentId } = req.body;
-    const studentId =req.user._id;
+    console.log(req.user);
+    const studentId = req.user._id;
     // Validate assignment and student existence
     const assignment = await Assignment.findById(assignmentId);
     const reviewee = await User.findById(studentId);
@@ -99,7 +100,7 @@ async function askForReview(req, res) {
     const invalidReviewers = [];
     for (const reviewerId of reviewerIds) {
       const linked = reviewerDoc.reviewers.find(
-        (r) => r.userId.toString() === reviewerId
+        (r) => r.userId.toString() === reviewerId.toString()
       );
       const exists = await User.exists({ _id: reviewerId });
 
