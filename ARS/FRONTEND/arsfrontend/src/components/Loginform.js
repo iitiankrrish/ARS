@@ -1,18 +1,19 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
 import "@fontsource/inter/900.css";
 import "@fontsource/inter/800.css";
 import "@fontsource/inter/700.css";
 import "@fontsource/inter/500.css";
 import GoogleIcon from "@mui/icons-material/Google";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { Box, Typography, Button, Divider } from "@mui/material";
+import { Box, Typography, Button, Divider, Fade } from "@mui/material";
 import TextField from "@mui/material/TextField";
 
-import {
-  CenterFocusStrong,
-  FamilyRestroom,
-  ForkLeft,
-} from "@mui/icons-material";
 function Loginform() {
+  const navigate = useNavigate();
+
   const theme = createTheme({
     palette: {
       background: {
@@ -25,8 +26,40 @@ function Loginform() {
       },
     },
   });
+
+  const [form, setform] = useState({
+    email: "",
+    phoneNumber: "",
+    password: "",
+  });
+
+  const checkforlogindetails = async () => {
+    try {
+      console.log(form);
+      const response = await axios.post("/user/login", form);
+      const successMessage = response.data.Success;
+      setstate({ ...state, open: true, message: successMessage });
+      console.log(response);
+      navigate("/profile/user");
+    } catch (error) {
+      console.log(error.response);
+      setstate({ ...state, open: true, message: error.response.data.Error });
+    }
+  };
+
+  const valueonchange = (e) => {
+    setform({ ...form, [e.target.name]: e.target.value });
+  };
+  const [state, setstate] = useState({
+    open: false,
+    message: "",
+    Transition: Fade,
+  });
+  const handleSnackbarClose = () => {
+    setstate({ ...state, open: false });
+  };
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <Box
         sx={{ width: 700, height: 500, bgcolor: theme.palette.background.main }}
       >
@@ -42,130 +75,42 @@ function Loginform() {
         >
           LOGIN
         </Typography>
+        <Snackbar
+          open={state.open}
+          onClose={handleSnackbarClose}
+          message={state.message}
+          key={state.Transition.name}
+          autoHideDuration={3000}
+        />
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           <TextField
             id="outlined"
             label="Email ID"
+            name="email"
+            value={form.email}
+            onChange={valueonchange}
             placeholder="examplemail123@gmail.com"
-            sx={{
-              width: 500,
-              marginTop: 3.5,
-
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#ff8c00", // default border
-                },
-                "&:hover fieldset": {
-                  borderColor: "#ffa733", // hover border
-                },
-                "&.Mui-focused": {
-                  backgroundColor: "#2c2c2c", // background on focus on the input container
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ff8c00", // focus border color
-                },
-                "& input::placeholder": {
-                  color: "#cccccc", // placeholder color
-                  opacity: 1,
-                },
-                "& input": {
-                  color: "#fff", // make sure input text is visible on dark bg
-                },
-              },
-
-              "& label": {
-                color: "#ff8c00", // default label
-              },
-              "& label.Mui-focused": {
-                color: "#ff8c00", // focused label
-              },
-            }}
+            sx={textfieldStyles}
           />
         </Box>
         <Box sx={{ display: "flex", justifyContent: "center", gap: 5 }}>
           <TextField
             id="outlined"
             label="Phone"
-            slotProps={{
-              input: {
-                inputMode: "numeric",
-                pattern: "[0-9]*",
-                maxLength: 10
-              },
-            }}
+            value={form.phoneNumber}
+            onChange={valueonchange}
+            name="phoneNumber"
             placeholder="xxxxxxxxxx"
-            sx={{
-              width: 230,
-              marginTop: 5,
-
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#ff8c00", // default border
-                },
-                "&:hover fieldset": {
-                  borderColor: "#ffa733", // hover border
-                },
-                "&.Mui-focused": {
-                  backgroundColor: "#2c2c2c", // background on focus on the input container
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ff8c00", // focus border color
-                },
-                "& input::placeholder": {
-                  color: "#cccccc", // placeholder color
-                  opacity: 1,
-                },
-                "& input": {
-                  color: "#fff", // make sure input text is visible on dark bg
-                },
-              },
-
-              "& label": {
-                color: "#ff8c00", // default label
-              },
-              "& label.Mui-focused": {
-                color: "#ff8c00", // focused label
-              },
-            }}
+            sx={textfieldStyles}
           />
           <TextField
             id="outlined-password-input"
             label="Password"
             type="password"
-            // autoComplete="current-password"
-            sx={{
-              width: 230,
-              marginTop: 5,
-
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#ff8c00", // default border
-                },
-                "&:hover fieldset": {
-                  borderColor: "#ffa733", // hover border
-                },
-                "&.Mui-focused": {
-                  backgroundColor: "#2c2c2c", // background on focus on the input container
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ff8c00", // focus border color
-                },
-                "& input::placeholder": {
-                  color: "#cccccc", // placeholder color
-                  opacity: 1,
-                },
-                "& input": {
-                  color: "#fff", // make sure input text is visible on dark bg
-                },
-              },
-
-              "& label": {
-                color: "#ff8c00", // default label
-              },
-              "& label.Mui-focused": {
-                color: "#ff8c00", // focused label
-              },
-            }}
+            value={form.password}
+            onChange={valueonchange}
+            name="password"
+            sx={textfieldStyles}
           />
         </Box>
         <Box
@@ -179,6 +124,7 @@ function Loginform() {
         >
           <Button
             variant="contained"
+            onClick={checkforlogindetails}
             sx={{
               bgcolor: theme.palette.cta.main,
               height: 35,
@@ -221,8 +167,41 @@ function Loginform() {
           </Button>
         </Box>
       </Box>
-    </>
+    </ThemeProvider>
   );
 }
+
+// Reusable style object to reduce duplication
+const textfieldStyles = {
+  width: 230,
+  marginTop: 5,
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: "#ff8c00",
+    },
+    "&:hover fieldset": {
+      borderColor: "#ffa733",
+    },
+    "&.Mui-focused": {
+      backgroundColor: "#2c2c2c",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "#ff8c00",
+    },
+    "& input::placeholder": {
+      color: "#cccccc",
+      opacity: 1,
+    },
+    "& input": {
+      color: "#fff",
+    },
+  },
+  "& label": {
+    color: "#ff8c00",
+  },
+  "& label.Mui-focused": {
+    color: "#ff8c00",
+  },
+};
 
 export default Loginform;

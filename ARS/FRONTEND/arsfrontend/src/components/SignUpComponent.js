@@ -9,14 +9,15 @@ import TextField from "@mui/material/TextField";
 import axios from "axios";
 import Snackbar from "@mui/material/Snackbar";
 import Fade from "@mui/material/Fade";
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 import React, { useState } from "react";
 import { RepeatOneSharp } from "@mui/icons-material";
-
+import { Navigate, useNavigate } from "react-router-dom";
 function SignUpComponent() {
+  const navigate = useNavigate();
   const [state, setState] = useState({
     open: false,
     message: "",
@@ -62,6 +63,7 @@ function SignUpComponent() {
         message: successMessage,
       });
       console.log(response.data);
+      navigate("/user/login");
     } catch (error) {
       const errorMessage = error.response.data.Error;
       setState({
@@ -241,30 +243,33 @@ function SignUpComponent() {
               },
             }}
           />
-          <FormControl sx={{width: 230,
-    marginTop: 5,
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: "#ff8c00",
-      },
-      "&:hover fieldset": {
-        borderColor: "#ffa733",
-      },
-      "&.Mui-focused": {
-        backgroundColor: "#2c2c2c",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#ff8c00",
-      },
-      "& input::placeholder": {
-        color: "#cccccc",
-        opacity: 1,
-      },
-      "& input": {
-        color: "#fff",
-      },
-    },
-}}>
+          <FormControl
+            sx={{
+              width: 230,
+              marginTop: 5,
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "#ff8c00",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#ffa733",
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "#2c2c2c",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#ff8c00",
+                },
+                "& input::placeholder": {
+                  color: "#cccccc",
+                  opacity: 1,
+                },
+                "& input": {
+                  color: "#fff",
+                },
+              },
+            }}
+          >
             <InputLabel id="role-label">Role</InputLabel>
             <Select
               labelId="role-label"
