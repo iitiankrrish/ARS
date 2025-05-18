@@ -41,12 +41,16 @@ async function createAssignment(req, res) {
           "Exactly same assignment already exists, you can add members to it but not create it again ... to create it ... delete it",
       });
     }
-    //Create subtasks 
+    //Create subtasks
     const arrayOfSubtaskId = [];
-    if(Array.isArray(subtask)){
-      for(const subtaskObject of subtask){
-        const {title,description} = subtaskObject;
-        const schemaStorage = await Subtask.create({title , description,dueDate});
+    if (Array.isArray(subtask)) {
+      for (const subtaskObject of subtask) {
+        const { title, description } = subtaskObject;
+        const schemaStorage = await Subtask.create({
+          title,
+          description,
+          dueDate,
+        });
         arrayOfSubtaskId.push(schemaStorage._id);
       }
     }
@@ -86,11 +90,9 @@ async function createAssignment(req, res) {
       if (!group) {
         return res.status(404).json({ error: "Group not found." });
       }
-      
 
       // Add all members of the group with 'pending' status
       for (const member of group.members) {
-
         // Check if the user is already in membersStatus
         const isAlreadyAdded = membersStatus.some(
           (status) =>
@@ -129,13 +131,13 @@ async function createAssignment(req, res) {
       membersStatus,
       status: "assigned",
       createdBy,
-      subtask: arrayOfSubtaskId,//stored as arrays of id of subtask 
+      subtask: arrayOfSubtaskId, //stored as arrays of id of subtask
       // reviewerAttachments: filesData,
     });
 
     const assignmentId = newAssignment._id;
-    for(const id of arrayOfSubtaskId){
-      await Subtask.findByIdAndUpdate(id , {assignmentId});
+    for (const id of arrayOfSubtaskId) {
+      await Subtask.findByIdAndUpdate(id, { assignmentId });
     }
     await Reviewer.create({
       assignment: assignmentId,
@@ -178,7 +180,8 @@ async function submissionOfAssignment(req, res) {
 
     if (!memberStatus) {
       return res.json({
-        Error: "No such member exists either in group or individually who has been assigned this assignment",
+        Error:
+          "No such member exists either in group or individually who has been assigned this assignment",
       });
     }
     if (assignment.dueDate < Date.now()) {
@@ -212,7 +215,7 @@ async function submissionOfAssignment(req, res) {
     // assignment.userAttachments.push(...filesData);
 
     // Ensure membersStatus exists and is an array
-    
+
     if (memberStatus.status == "submitted") {
       return res.json({
         Message: `Cannot submit because the assignment is ${memberStatus.status}`,
@@ -517,6 +520,124 @@ async function groupSubmissionOfAssignment(req, res) {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+async function getpendingassignments(req, res) {
+  const { studentId } = req.params;
+
+  try {
+    const allAssignments = await Assignment.find({}); // lean = better perf
+
+    const pendingAssignments = [];
+
+    allAssignments.forEach((assignment) => {
+      const matchingMember = assignment.membersStatus.find(
+        (member) => member.userId.toString() === studentId.toString() && member.status === "pending"
+      );
+
+      if (matchingMember) {
+        pendingAssignments.push({
+          title: assignment.title,
+          description: assignment.description,
+          dueDate: assignment.dueDate,
+          status: matchingMember.status,
+        });
+      }
+    });
+
+    return res.json(pendingAssignments);
+  } catch (err) {
+    console.error("Error fetching assignments:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+async function getallassignments(req, res) {
+  const { studentId } = req.params;
+
+  const allmyassignmentobject = [];
+
+  try {
+    const allAssignments = await Assignment.find({});
+
+    allAssignments.forEach((assignment) => {
+      const memberstatus = assignment.membersStatus;
+
+      for (const member of memberstatus) {
+        if ( member.userId.toString() === studentId.toString()) {
+          allmyassignmentobject.push({
+            title: assignment.title,
+            description: assignment.description,
+            dueDate: assignment.dueDate,
+            status: member.status,
+          });
+        }
+      }
+    });
+
+    return res.json(allmyassignmentobject);
+  } catch (err) {
+    console.error("Error fetching assignments:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+async function getreviewedassignments(req, res) { 
+  const { studentId } = req.params;
+
+  try {
+    const allAssignments = await Assignment.find({}).lean(); // lean = better perf
+
+    const pendingAssignments = [];
+
+    allAssignments.forEach((assignment) => {
+      const matchingMember = assignment.membersStatus.find(
+        (member) =>  member.userId.toString() === studentId.toString() && member.status === "submitted"
+      );
+
+      if (matchingMember) {
+        pendingAssignments.push({
+          title: assignment.title,
+          description: assignment.description,
+          dueDate: assignment.dueDate,
+          status: matchingMember.status,
+        });
+      }
+    });
+
+    return res.json(pendingAssignments);
+  } catch (err) {
+    console.error("Error fetching assignments:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+async function getacceptedassignments(req, res) { 
+    const { studentId } = req.params;
+
+  try {
+    const allAssignments = await Assignment.find({}).lean(); // lean = better perf
+
+    const pendingAssignments = [];
+
+    allAssignments.forEach((assignment) => {
+      const matchingMember = assignment.membersStatus.find(
+        (member) =>  member.userId.toString() === studentId.toString() && member.status === "accepted"
+      );
+
+      if (matchingMember) {
+        pendingAssignments.push({
+          title: assignment.title,
+          description: assignment.description,
+          dueDate: assignment.dueDate,
+          status: matchingMember.status,
+        });
+      }
+    });
+
+    return res.json(pendingAssignments);
+  } catch (err) {
+    console.error("Error fetching assignments:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 
 module.exports = {
   createAssignment,
@@ -526,4 +647,8 @@ module.exports = {
   addUserOrGroupToExistingAssignment,
   removeAssignment,
   groupSubmissionOfAssignment,
+  getpendingassignments,
+  getacceptedassignments,
+  getreviewedassignments,
+  getallassignments
 };
