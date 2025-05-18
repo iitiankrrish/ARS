@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "THIS IS THE WINTER ASSIGNMENT OF IMG WHICH IS BASICALLY AN ASSIGMENT REVIEWING SYSTEM",
   "main": "index.js",
-  "proxy": "http://localhost:8000",
+  
   "scripts": {
     "start": "nodemon index.js"
   },
