@@ -1,8 +1,41 @@
-const express = require('express');
-const {UserLoggedInOrNot} = require('../middlewares/authorisation');
+const express = require("express");
+const { UserLoggedInOrNot } = require("../middlewares/authorisation");
+const {
+  roleVerifierForAdminAndForReviewer,
+} = require("../middlewares/assignment");
+const {
+  joinGroup,
+  createGroup,
+  makeCaptain,
+  findMyGroup,
+  getAllInfoAboutTheGroup,
+} = require("../controllers/group");
 
-const {joinGroup , createGroup} = require("../controllers/group");
 const router = express.Router();
-router.post("/create",UserLoggedInOrNot,createGroup)
-router.post('/join/:groupId',UserLoggedInOrNot,joinGroup);
+
+// Create a group (admin or reviewer)
+router.post(
+  "/create",
+  UserLoggedInOrNot,
+  roleVerifierForAdminAndForReviewer,
+  createGroup
+);
+
+// Make a captain
+router.post(
+  "/chooseCaptain",
+  UserLoggedInOrNot,
+  roleVerifierForAdminAndForReviewer,
+  makeCaptain
+);
+
+// Join a group (any user)
+router.post("/join/:groupId", UserLoggedInOrNot, joinGroup);
+
+// Get all groups a user is part of
+router.post("/mygroups/:userId", UserLoggedInOrNot, findMyGroup);
+
+// Get all info about a specific group
+router.post("/group/:groupId", UserLoggedInOrNot, getAllInfoAboutTheGroup);
+
 module.exports = router;

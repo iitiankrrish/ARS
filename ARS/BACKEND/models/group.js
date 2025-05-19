@@ -23,7 +23,6 @@ const groupSchema = new mongoose.Schema({
     captainId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required : true ,
     }
 }, { timestamps: true }); // Optionally add timestamps for createdAt and updatedAt
 

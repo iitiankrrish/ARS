@@ -54,6 +54,14 @@ function Sidebar({ username }) {
       console.error("Logout failed:", err);
     }
   };
+  const handlemygroup = async () => {
+    try {
+      console.log("Switched to my groups");
+      navigate("/group/mygroup"); // Redirect to login page
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const menuItems = [
     { icon: <HomeFilled />, label: "HOME" },
@@ -68,35 +76,35 @@ function Sidebar({ username }) {
   const allassignmentclick = () => {
     try {
       navigate("/assignment/allassignment");
-      console.log("switched to all assignments page")
+      console.log("switched to all assignments page");
     } catch (err) {
       console.log(err);
     }
-  }
+  };
   const viewprofilechange = () => {
     try {
       navigate("/profile/user");
-      console.log("switched to all assignments page")
+      console.log("switched to all assignments page");
     } catch (err) {
       console.log(err);
     }
-  }
+  };
   const pendingassignmentclick = () => {
     try {
       navigate("/assignment/pendingassignment");
-      console.log("switched to all assignments page")
+      console.log("switched to all assignments page");
     } catch (err) {
       console.log(err);
     }
-  }
+  };
   const accepetedassignmentclick = () => {
     try {
       navigate("/assignment/reviewedassignment");
-      console.log("switched to all assignments page")
+      console.log("switched to all assignments page");
     } catch (err) {
       console.log(err);
     }
-  }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -183,7 +191,7 @@ function Sidebar({ username }) {
 
           {/* REVIEWED */}
           <Box
-          onClick = {accepetedassignmentclick}
+            onClick={accepetedassignmentclick}
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -215,7 +223,7 @@ function Sidebar({ username }) {
 
           {/* UNREVIEWED */}
           <Box
-            onClick = {pendingassignmentclick}
+            onClick={pendingassignmentclick}
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -278,7 +286,7 @@ function Sidebar({ username }) {
 
           {/* VIEW PROFILE */}
           <Box
-          onClick = {viewprofilechange}
+            onClick={viewprofilechange}
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -341,6 +349,7 @@ function Sidebar({ username }) {
 
           {/* CREATE GROUP */}
           <Box
+            onClick={handlemygroup} // ✅ Correct: attach onClick to the whole Box
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -366,7 +375,7 @@ function Sidebar({ username }) {
                 fontSize: "17px",
               }}
             >
-              CREATE GROUP
+              MY GROUP
             </Typography>
           </Box>
 
@@ -435,7 +444,6 @@ function Sidebar({ username }) {
           </Typography>
         </Box>
       </Box>
-
     </ThemeProvider>
   );
 }

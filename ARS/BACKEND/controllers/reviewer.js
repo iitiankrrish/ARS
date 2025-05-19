@@ -141,30 +141,54 @@ async function giveReviewTheAssignmentAndNotAcceptIt(req, res) {
     const student = assignment.membersStatus.find(
       (s) => s.userId.toString() === studentId
     );
+    const group = assignment.groupSubmissionStatus.find(
+      (s) => s.groupId.toString() === studentId
+    );
 
-    if (!student) {
+    if (!student && !group) {
       return res
         .status(404)
-        .json({ error: "Student not found in this assignment" });
+        .json({ error: "Student and Group not found in this assignment" });
     }
-    if (student.status != "submitted") {
-      return res.json({
-        Error: "You cannot review a pre-evaluated or an unsubmitted assignment",
+    if(!group){
+      if (student.status != "submitted") {
+        return res.json({
+          Error: "You cannot review a pre-evaluated or an unsubmitted assignment",
+        });
+      }
+      assignment.reviewCount = assignment.reviewCount + 1;
+  
+      // Add review to student's reviews
+      student.reviews.push({
+        reviewerId,
+        comments,
+        iterationNumber,
+        reviewedAt: new Date(),
       });
+  
+      student.status = "pending"; // Mark status as pending
+      await assignment.save();
+    }
+    if(!student){
+      if (group.status != "submitted") {
+        return res.json({
+          Error: "You cannot review a pre-evaluated or an unsubmitted assignment",
+        });
+      }
+      assignment.reviewCount = assignment.reviewCount + 1;
+  
+      // Add review to student's reviews
+      group.reviews.push({
+        reviewerId,
+        comments,
+        iterationNumber,
+        reviewedAt: new Date(),
+      });
+  
+      group.status = "pending"; // Mark status as pending
+      await assignment.save();
     }
 
-    assignment.reviewCount = assignment.reviewCount + 1;
-
-    // Add review to student's reviews
-    student.reviews.push({
-      reviewerId,
-      comments,
-      iterationNumber,
-      reviewedAt: new Date(),
-    });
-
-    student.status = "pending"; // Mark status as pending
-    await assignment.save();
 
     res.status(200).json({ success: "Review submitted successfully" });
   } catch (error) {
@@ -186,17 +210,35 @@ async function acceptTheAssignment(req, res) {
     const student = assignment.membersStatus.find(
       (s) => s.userId.toString() === studentId
     );
-    if (!student) {
+    const group = assignment.groupSubmissionStatus.find(
+      (s) => s.groupId.toString() === studentId
+    );
+
+    if (!student && !group) {
       return res
         .status(404)
-        .json({ error: "Student not found in this assignment" });
+        .json({ error: "Student and Group not found in this assignment" });
     }
-    if (student.status !== "submitted") {
-      return res.json("You cannot accept a pending or pre-accepted assignment");
-    }
+    if(!group){
+      if (student.status != "submitted") {
+        return res.json({
+          Error: "You cannot review a pre-evaluated or an unsubmitted assignment",
+        });
+      }
 
-    student.status = "accepted"; // Mark as accepted
-    await assignment.save();
+      student.status = "accepted"; // Mark as accepted
+      await assignment.save();
+    }
+    if(!student){
+      if (group.status != "submitted") {
+        return res.json({
+          Error: "You cannot review a pre-evaluated or an unsubmitted assignment",
+        });
+      }
+
+      group.status = "accepted"; // Mark as accepted
+      await assignment.save();
+    }
 
     res.status(200).json({ success: "Assignment accepted successfully" });
   } catch (error) {

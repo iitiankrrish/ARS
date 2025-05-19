@@ -1,4 +1,6 @@
 const Group = require("../models/group");
+const User = require("../models/user");
+const Assignment = require("../models/assignment");
 async function joinGroup(req, res) {
   const { groupId } = req.params;
   const userId = req.user._id;
@@ -7,7 +9,7 @@ async function joinGroup(req, res) {
     return res.status(400).json({ Error: "Group Id is required" });
   }
   try {
-    const group = await Group.findOne({ groupId });
+const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({ error: "Group not found." });
     }
@@ -23,7 +25,7 @@ async function joinGroup(req, res) {
   }
 }
 async function createGroup(req, res) {
-  const { name, groupId, members , captainId} = req.body;
+  const { name, groupId, members, captainId } = req.body;
   const createdBy = req.user._id;
   if (!name) {
     return res.json({ Error: "name is a required field" });
@@ -38,7 +40,7 @@ async function createGroup(req, res) {
 
   try {
     // Create a new group
-    const existingGroup = await Group.findOne({ groupId });
+const existingGroup = await Group.findOne({ groupId });
     if (existingGroup) {
       return res
         .status(400)
@@ -49,7 +51,7 @@ async function createGroup(req, res) {
       groupId,
       createdBy,
       members: allMembers,
-      captain : captainId,
+      captain: captainId,
     });
 
     // Save the group to the database
@@ -60,4 +62,93 @@ async function createGroup(req, res) {
     return res.json({ Error: "Error Occured" });
   }
 }
-module.exports = { joinGroup, createGroup };
+async function makeCaptain(req, res) {
+  const { groupId, email, phoneNumber, username, name } = req.body;
+
+  try {
+    const groupinfo = await Group.findById(groupId);
+    if (!groupinfo) {
+      return res.status(404).json({ error: "No group found with this id" });
+    }
+    const userinfo = await User.findOne({ email, phoneNumber, username, name });
+
+    if (!userinfo) {
+      return res.status(404).json({ error: "No user found with these details" });
+    }
+
+    const userid = userinfo._id.toString();
+    const allmembers = groupinfo.members.map(m => m.toString());
+
+    // Check if user is already in the group members
+    const ispresent = allmembers.includes(userid);
+
+    if (!ispresent) {
+      groupinfo.members.push(userinfo._id);
+    }
+
+    groupinfo.captainId = userinfo._id;
+    await groupinfo.save();
+
+    return res.json({ message: "Successfully created the captain" });
+  } catch (error) {
+    console.error("Error in makeCaptain:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+async function findMyGroup(req, res) {
+  const { userId } = req.params;
+  const groupswithme = [];
+
+  try {
+    const groupAll = await Group.find({});
+    for (const group of groupAll) {
+      // Check if userId is in the group's members array
+      if (
+        group.members.some((member) => member.toString() === userId.toString())
+      ) {
+        groupswithme.push(group);
+      }
+    }
+    return res.json(groupswithme);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+async function getAllInfoAboutTheGroup(req, res) {
+  const { groupId } = req.params;
+
+  try {
+    // Fetch basic group info
+    const groupbasicinfo = await Group.findById(groupId);
+    if (!groupbasicinfo) {
+      return res.status(404).json({ error: "Group not found" });
+    }
+
+    // Fetch all assignments
+    const allassignments = await Assignment.find({});
+    const myAssignments = [];
+
+    // Filter assignments where groupId exists in groupSubmissionStatus
+    for (const assignment of allassignments) {
+      const allgroups = assignment.groupSubmissionStatus || [];
+      for (const group of allgroups) {
+        if (group.groupId.toString() === groupId.toString()) {
+          myAssignments.push(assignment);
+          break; // no need to check other groups for this assignment
+        }
+      }
+    }
+
+    // Send combined response
+    return res.json({
+      groupbasicinfo,
+      myAssignments,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+module.exports = { joinGroup, createGroup, makeCaptain, findMyGroup , getAllInfoAboutTheGroup};

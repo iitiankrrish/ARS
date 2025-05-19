@@ -11,6 +11,8 @@ import Signuppage from "./pages/Signuppage";
 import Reviewedassignment from './pages/Reviewedassignment';
 import Pendingassignment from "./pages/Pendingassignment";
 import AssignmentToOpen from './pages/Assignmentopen';
+import Groupcard from "./components/Groupcard";
+import Allgroups from './pages/Mygroups'
 function App() {
   return (
     <>
@@ -25,6 +27,7 @@ function App() {
       <Route path="/assignment/allassignment" element={<Allassignment/>}></Route>
       <Route path="/assignment/pendingassignment" element={<Pendingassignment/>}></Route>
       <Route path="/assignment/selectedassignment/:id" element={<AssignmentToOpen/>}></Route>
+      <Route path="/group/mygroup" element={<Allgroups />}></Route>
     </Routes>
       </>
   );

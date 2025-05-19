@@ -11,7 +11,7 @@ const subtaskSchema = new mongoose.Schema({
     },
     assignmentId: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
+        // required: true,
     },
     status: {
         type: String,

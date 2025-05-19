@@ -44,16 +44,17 @@ const {
   createAssignment,
   submissionOfAssignment,
   sendAssignment,
-  assignmentUnsubmission,
-  addUserOrGroupToExistingAssignment,
+  addUserToExistingAssignment,
   removeAssignment,
+  addGroupToExistingAssignment,
   getpendingassignments,
   getacceptedassignments,
   getreviewedassignments,
   getallassignments,
   getselectedassignmentinfo
   ,getUserComments,
-  getAssignmentStatusForThatUser
+  getAssignmentStatusForThatUser,
+  groupSubmissionOfAssignment
 } = require("../controllers/assignment");
 const {
   roleVerifierForAdminAndForReviewer,
@@ -65,16 +66,22 @@ router.post(
   createAssignment
 );
 router.post("/submit/:assignmentId", UserLoggedInOrNot, submissionOfAssignment);
+router.post("/submitforgroup/:assignmentId", UserLoggedInOrNot, groupSubmissionOfAssignment);
 router.post("/send/:assignmentId", UserLoggedInOrNot, sendAssignment);
+// router.post(
+//   "/unsubmit/:assignmentId",
+//   UserLoggedInOrNot,
+//   assignmentUnsubmission
+// );
 router.post(
-  "/unsubmit/:assignmentId",
+  "/addUser/:userId/:assignmentId",
   UserLoggedInOrNot,
-  assignmentUnsubmission
+  addUserToExistingAssignment
 );
 router.post(
-  "/add/:assignmentId",
+  "/addGroup/:groupId/:userId/:assignmentId",
   UserLoggedInOrNot,
-  addUserOrGroupToExistingAssignment
+  addGroupToExistingAssignment
 );
 router.post("/remove/:assignmentId", UserLoggedInOrNot, removeAssignment);
 router.get(

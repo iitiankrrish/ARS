@@ -132,5 +132,10 @@ async function askForReview(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-
-module.exports =  { handleSignUp, handleLogIn, handleLogOut ,askForReview};
+async function getuserbyid(req,res){
+  const {userId} = req.params;
+  const userdata = await User.findById(userId);
+  if(!userdata) return res.json("no such user exists");
+  return res.json(userdata);
+}
+module.exports =  { handleSignUp, handleLogIn, handleLogOut ,askForReview , getuserbyid};
