@@ -217,9 +217,11 @@ async function submissionOfAssignment(req, res) {
     // Ensure membersStatus exists and is an array
 
     if (memberStatus.status == "submitted") {
+      console.log("bitch")
       return res.json({
         Message: `Cannot submit because the assignment is ${memberStatus.status}`,
       });
+
     }
     console.log(memberStatus);
     // Update the status of the user to "submitted"
@@ -232,7 +234,7 @@ async function submissionOfAssignment(req, res) {
     console.log(memberStatus);
 
     memberStatus.submittedAt = Date.now();
-    assignment.markModified('membersStatus');
+    assignment.markModified("membersStatus");
     await assignment.save(); // Save the assignment after the update
 
     res.status(200).json({ message: "Assignment submitted successfully" });
@@ -525,7 +527,7 @@ async function groupSubmissionOfAssignment(req, res) {
     ];
     groupSubmissionStatus.status = "submitted";
     groupSubmissionStatus.submittedAt = Date.now();
-    assignment.markModified('groupSubmissionStatus');
+    assignment.markModified("groupSubmissionStatus");
     await assignment.save(); // Save the assignment after the update
 
     res.status(200).json({ message: "Assignment submitted successfully" });
@@ -681,6 +683,66 @@ async function getselectedassignmentinfo(req, res) {
     res.status(500).json({ message: "Server error" });
   }
 }
+async function getUserComments(req, res) {
+  const { assignmentId, studentId } = req.params;
+
+  try {
+    const assignment = await Assignment.findById(assignmentId);
+
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    // Find the member entry for the student
+    const member = assignment.membersStatus.find(
+      (m) => m.userId.toString() === studentId
+    );
+
+    if (!member) {
+      return res.status(404).json({ message: "Student not found in membersStatus" });
+    }
+
+    // Get non-empty comments
+    const nonEmptyComments = (member.revieweeComments || []).filter(
+      (commentObj) =>
+        commentObj &&
+        typeof commentObj.comment === "string" &&
+        commentObj.comment.trim() !== ""
+    );
+   const comments = nonEmptyComments.map(commentObj => commentObj.comment);
+
+    return res.json(comments);
+  } catch (error) {
+    console.error("Error in getUserComments:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+async function getAssignmentStatusForThatUser(req, res) {
+  const { assignmentId, studentId } = req.params;
+
+  try {
+    const assignment = await Assignment.findById(assignmentId);
+
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    // Find the member entry for the student
+    const member = assignment.membersStatus.find(
+      (m) => m.userId.toString() === studentId
+    );
+
+    if (!member) {
+      return res.status(404).json({ message: "Student not found in membersStatus" });
+    }
+
+    return res.json(member.status);
+  } catch (error) {
+    console.error("Error in getUserComments:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 
 module.exports = {
   createAssignment,
@@ -695,4 +757,7 @@ module.exports = {
   getreviewedassignments,
   getallassignments,
   getselectedassignmentinfo,
+  getUserComments,
+  getAssignmentStatusForThatUser
+  
 };

@@ -52,6 +52,8 @@ const {
   getreviewedassignments,
   getallassignments,
   getselectedassignmentinfo
+  ,getUserComments,
+  getAssignmentStatusForThatUser
 } = require("../controllers/assignment");
 const {
   roleVerifierForAdminAndForReviewer,
@@ -99,5 +101,15 @@ router.get(
   "/getselectedassignmentinfo/:id",
   UserLoggedInOrNot,
   getselectedassignmentinfo
+);
+router.get(
+  "/getcomments/:studentId/:assignmentId",
+  UserLoggedInOrNot,
+  getUserComments
+);
+router.get(
+  "/getstatus/:studentId/:assignmentId",
+  UserLoggedInOrNot,
+  getAssignmentStatusForThatUser
 );
 module.exports = router;

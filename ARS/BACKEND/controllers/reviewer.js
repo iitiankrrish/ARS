@@ -1,6 +1,7 @@
 const Reviewer = require("../models/reviewer");
 const Assignment = require("../models/assignment");
 const Subtask = require("../models/subtask");
+const User = require("../models/user");
 async function sendRequest(req, res) {
   const { assignmentId, reviewerId } = req.body;
   const requestedBy = req.user._id;
@@ -135,22 +136,24 @@ async function giveReviewTheAssignmentAndNotAcceptIt(req, res) {
     if (!assignment) {
       return res.status(404).json({ error: "Assignment not found" });
     }
-   
+
     // Find student in the assignment's membersStatus
     const student = assignment.membersStatus.find(
       (s) => s.userId.toString() === studentId
     );
-    
+
     if (!student) {
       return res
         .status(404)
         .json({ error: "Student not found in this assignment" });
     }
-     if(student.status != "submitted"){
-      return res.json({"Error":"You cannot review a pre-evaluated or an unsubmitted assignment"});
+    if (student.status != "submitted") {
+      return res.json({
+        Error: "You cannot review a pre-evaluated or an unsubmitted assignment",
+      });
     }
 
-    assignment.reviewCount = assignment.reviewCount +1;
+    assignment.reviewCount = assignment.reviewCount + 1;
 
     // Add review to student's reviews
     student.reviews.push({
@@ -188,7 +191,7 @@ async function acceptTheAssignment(req, res) {
         .status(404)
         .json({ error: "Student not found in this assignment" });
     }
-    if(student.status !== "submitted"){
+    if (student.status !== "submitted") {
       return res.json("You cannot accept a pending or pre-accepted assignment");
     }
 
@@ -201,5 +204,51 @@ async function acceptTheAssignment(req, res) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+async function getReviewerForParticularAssignment(req, res) {
+  try {
+    const { assignmentId } = req.params;
 
-module.exports = { sendRequest, responseToRequest ,giveReviewTheAssignmentAndNotAcceptIt,acceptTheAssignment};
+    if (!assignmentId) {
+      return res.status(400).json({ error: "Assignment ID is required" });
+    }
+
+    const assignment = await Assignment.findById(assignmentId);
+    if (!assignment) {
+      return res.status(404).json({ error: "Assignment not found" });
+    }
+
+    const reviewerDoc = await Reviewer.findOne({ assignment: assignmentId });
+    if (!reviewerDoc || !reviewerDoc.reviewers) {
+      return res
+        .status(404)
+        .json({ error: "No reviewers found for this assignment" });
+    }
+
+    const reviewerIds = reviewerDoc.reviewers;
+    const reviewerData = [];
+    console.log(reviewerData);
+    console.log(reviewerIds);
+    for (const reviewerId of reviewerIds) {
+      const reviewerInfo = await User.findById(reviewerId.userId);
+      if (reviewerInfo) {
+        reviewerData.push({
+          _id: reviewerId,
+          name: reviewerInfo.name,
+        });
+      }
+    }
+    console.log(reviewerData);
+    return res.json(reviewerData);
+  } catch (err) {
+    console.error("Error in getReviewerForParticularAssignment:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+module.exports = {
+  sendRequest,
+  responseToRequest,
+  giveReviewTheAssignmentAndNotAcceptIt,
+  acceptTheAssignment,
+  getReviewerForParticularAssignment
+};
