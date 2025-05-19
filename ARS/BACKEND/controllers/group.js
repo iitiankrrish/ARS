@@ -151,4 +151,9 @@ async function getAllInfoAboutTheGroup(req, res) {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }
-module.exports = { joinGroup, createGroup, makeCaptain, findMyGroup , getAllInfoAboutTheGroup};
+async function findMyGroupbygroupid(req,res){
+  const {groupName,groupId} = req.params;
+  const groups = await Group.findOne({groupName,groupId});
+  return res.json(groups);
+}
+module.exports = { joinGroup, createGroup, makeCaptain, findMyGroup , getAllInfoAboutTheGroup , findMyGroupbygroupid};

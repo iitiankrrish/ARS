@@ -5,7 +5,7 @@ const Assignment = require("../models/assignment");
 const ReviewRequest = require("../models/reviewRequestStorage")
 const { setUser } = require("../services/auth");
 
-async function handleSignUp(req, res) {
+async function handleSignUp(req, res) {ss
     try {
         const { name, username, password, phoneNumber, email ,role } = req.body;
 

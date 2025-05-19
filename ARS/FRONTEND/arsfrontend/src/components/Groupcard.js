@@ -8,41 +8,79 @@ import axios from "axios";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
-import PreviewIcon from "@mui/icons-material/Preview";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { Source } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { useEffect } from "react";
-function Groupcard({ groupname, groupid, captainid , memberlength, creator }) {
-//   console.log(id);
-//   const dateObj = new Date(dueDate);
-//   const day = dateObj.getDate();
-//   const month = dateObj.getMonth() + 1;
-//   const year = dateObj.getFullYear();
-//   const navigator = useNavigate();
-//   const date = `${month}/${day}/${year}`;
-    const[creatorname , setcreatorname ] = useState("");
-    const creatorfinder = async ()=>{
-        const response = await axios.post(`/user/getuserbyid/${creator}`);
-        console.log(response);
-        setcreatorname(response.data.name);
-        console.log(creatorname);
+import { useState, useEffect } from "react";
+
+function Groupcard({ groupname, groupid, captainid, memberlength, creator }) {
+  const [creatorname, setcreatorname] = useState("");
+  const [captainname, setcaptainname] = useState("");
+  const [groupinfo, setgroupinfo] = useState(null);
+  const navigate = useNavigate();
+
+  // Fetch Creator Name
+  useEffect(() => {
+    const fetchCreator = async () => {
+      if (!creator) return;
+      try {
+        const res = await axios.post(`/user/getuserbyid/${creator}`);
+        if (res.data?.name) {
+          setcreatorname(res.data.name);
+          console.log("Creator name fetched:", res.data.name);
+        }
+      } catch (err) {
+        console.error("Error fetching creator:", err);
+      }
+    };
+    fetchCreator();
+  }, [creator]);
+
+  // Fetch Captain Name
+  useEffect(() => {
+    const fetchCaptain = async () => {
+      if (!captainid) return;
+      try {
+        const res = await axios.post(`/user/getuserbyid/${captainid}`);
+        if (res.data?.name) {
+          setcaptainname(res.data.name);
+          console.log("Captain name fetched:", res.data.name);
+        }
+      } catch (err) {
+        console.error("Error fetching captain:", err);
+      }
+    };
+    fetchCaptain();
+  }, [captainid]);
+
+  // Fetch Group Info
+  useEffect(() => {
+    const fetchGroupInfo = async () => {
+      if (!groupid || !groupname) return;
+      try {
+        const res = await axios.post(`/group/find/${groupid}/${groupname}`);
+        if (res.data) {
+          setgroupinfo(res.data);
+          console.log("Group info fetched:", res.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch group info:", err);
+      }
+    };
+    fetchGroupInfo();
+  }, [groupid, groupname]);
+
+  // Handle Group View Navigation
+  const handlegroupview = () => {
+    if (groupinfo && groupinfo._id) {
+      localStorage.setItem("groupinfo", JSON.stringify(groupinfo));
+      console.log("Group info saved to localStorage");
+      navigate(`/group/particulargroup`);
+    } else {
+      console.error("Group info not loaded yet");
     }
-    useEffect(() => {
-      creatorfinder()
-    }, [creator])
-    const[captainname , setcaptainname ] = useState("");
-    const captain = async ()=>{
-        const response = await axios.post(`/user/getuserbyid/${captainid}`);
-        console.log(response);
-        setcaptainname(response.data.name);
-        console.log(creatorname);
-    }
-    useEffect(() => {
-      captain()
-    }, [captainname])
-    
+  };
+
   const theme = createTheme({
     palette: {
       background: {
@@ -59,19 +97,11 @@ function Groupcard({ groupname, groupid, captainid , memberlength, creator }) {
       fontFamily: "Inter, sans-serif",
     },
   });
-//   const openselectedassignment = async () => {
-//     try {
-//       navigator(`/assignment/selectedassignment/${id}`);
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   };
 
   return (
     <ThemeProvider theme={theme}>
       <Card
         sx={{
-          // paddingBottom: 6,
           width: 375,
           height: 250,
           overflow: "auto",
@@ -93,13 +123,13 @@ function Groupcard({ groupname, groupid, captainid , memberlength, creator }) {
             variant="body2"
             sx={{ mt: 1, color: theme.palette.cta.secondaryText }}
           >
-            Group Number : {groupid}
+            Group Number: {groupid}
           </Typography>
           <Typography variant="body2" sx={{ mt: 2, color: "#7A7A7A" }}>
-            Captain : {captainname}
+            Captain: {captainname || "Not assigned"}
           </Typography>
           <Typography variant="body2" sx={{ mt: 2, color: "#7A7A7A" }}>
-            Number of Members : {memberlength}
+            Number of Members: {memberlength}
           </Typography>
         </CardContent>
         <CardActions>
@@ -113,7 +143,7 @@ function Groupcard({ groupname, groupid, captainid , memberlength, creator }) {
             <Button
               onClick={handlegroupview}
               startIcon={
-                <Source sx={{ color: "theme.palette.background.sidebarbg" }} />
+                <Source sx={{ color: theme.palette.background.sidebarbg }} />
               }
               sx={{
                 fontSize: 16,
@@ -139,7 +169,7 @@ function Groupcard({ groupname, groupid, captainid , memberlength, creator }) {
               bottom: 18,
             }}
           >
-            Created By : {creatorname}
+            Created By: {creatorname || "Unknown"}
           </Typography>
         </CardActions>
       </Card>

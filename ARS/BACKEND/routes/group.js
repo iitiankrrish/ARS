@@ -9,6 +9,7 @@ const {
   makeCaptain,
   findMyGroup,
   getAllInfoAboutTheGroup,
+  findMyGroupbygroupid
 } = require("../controllers/group");
 
 const router = express.Router();
@@ -37,5 +38,6 @@ router.post("/mygroups/:userId", UserLoggedInOrNot, findMyGroup);
 
 // Get all info about a specific group
 router.post("/group/:groupId", UserLoggedInOrNot, getAllInfoAboutTheGroup);
+router.post("/find/:groupId/:groupName", UserLoggedInOrNot, findMyGroupbygroupid);
 
 module.exports = router;
