@@ -49,7 +49,7 @@ function GroupToOpen() {
       const res = await axios.post(`/group/group/${id}`, { withCredentials: true });
       const data = res.data;
       setGroupdata(data);
-
+      console.log(data);
       // Fetch captain name
       const captainRes = await axios.post(`/user/getuserbyid/${data.groupbasicinfo.captainId}`);
       setCaptainName(captainRes.data.name);

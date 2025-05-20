@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -7,8 +7,14 @@ import {
   Divider,
   ThemeProvider,
   createTheme,
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
-
 import {
   AlternateEmail,
   CheckCircleOutline,
@@ -41,68 +47,93 @@ function Sidebar({ username }) {
     },
   });
 
+  // Dialog open state here
+  const [open, setOpen] = useState(false);
+const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    setformval("");
+  };
   const handleLogout = async () => {
     try {
-      const res = await axios.post(
-        "/user/logout",
-        {},
-        { withCredentials: true }
-      );
+      const res = await axios.post("/user/logout", {}, { withCredentials: true });
       console.log("Logout successful:", res);
       navigate("/user/login"); // Redirect to login page
     } catch (err) {
       console.error("Logout failed:", err);
     }
   };
-  const handlemygroup = async () => {
+
+  const handleMyGroup = () => {
     try {
       console.log("Switched to my groups");
-      navigate("/group/mygroup"); // Redirect to login page
+      navigate("/group/mygroup");
     } catch (err) {
       console.log(err);
     }
   };
 
-  const menuItems = [
-    { icon: <HomeFilled />, label: "HOME" },
-    { icon: <CheckCircleOutline />, label: "REVIEWED" },
-    { icon: <HelpOutline />, label: "UNREVIEWED" },
-    { icon: <Email />, label: "MESSAGES" },
-    { icon: <PersonOutline />, label: "VIEW PROFILE" },
-    { icon: <AlternateEmail />, label: "REQUESTS" },
-    { icon: <People />, label: "CREATE GROUP" },
-    { icon: <GroupAdd />, label: "JOIN GROUP" },
-  ];
-  const allassignmentclick = () => {
+  const allAssignmentClick = () => {
     try {
       navigate("/assignment/allassignment");
-      console.log("switched to all assignments page");
+      console.log("Switched to all assignments page");
     } catch (err) {
       console.log(err);
     }
   };
-  const viewprofilechange = () => {
+  const handlerequest= () => {
+    try {
+      navigate("/requests");
+      console.log("Switched to request page");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const viewProfileChange = () => {
     try {
       navigate("/profile/user");
-      console.log("switched to all assignments page");
+      console.log("Switched to profile page");
     } catch (err) {
       console.log(err);
     }
   };
-  const pendingassignmentclick = () => {
+
+  const pendingAssignmentClick = () => {
     try {
       navigate("/assignment/pendingassignment");
-      console.log("switched to all assignments page");
+      console.log("Switched to pending assignments page");
     } catch (err) {
       console.log(err);
     }
   };
-  const accepetedassignmentclick = () => {
+
+  const acceptedAssignmentClick = () => {
     try {
       navigate("/assignment/reviewedassignment");
-      console.log("switched to all assignments page");
+      console.log("Switched to reviewed assignments page");
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  
+  const [formval, setformval] = useState(0);
+
+  const handleJoining = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(`/group/join/${formval}`);
+      console.log(response.data);
+      alert("successfully added to group");
+      handleClose();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const handleOnChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setformval(value); // Only allow numeric values
     }
   };
 
@@ -110,8 +141,8 @@ function Sidebar({ username }) {
     <ThemeProvider theme={theme}>
       <Box
         sx={{
-          wordBreak: "break-word", // or "break-all"
-          whiteSpace: "normal", // allows wrapping
+          wordBreak: "break-word",
+          whiteSpace: "normal",
           width: "300px",
           height: "100vh",
           bgcolor: theme.palette.background.sidebarbg,
@@ -159,7 +190,7 @@ function Sidebar({ username }) {
         <Box sx={{ display: "flex", flexDirection: "column", marginTop: 2 }}>
           {/* HOME */}
           <Box
-            onClick={allassignmentclick}
+            onClick={allAssignmentClick}
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -191,7 +222,7 @@ function Sidebar({ username }) {
 
           {/* REVIEWED */}
           <Box
-            onClick={accepetedassignmentclick}
+            onClick={acceptedAssignmentClick}
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -221,9 +252,9 @@ function Sidebar({ username }) {
             </Typography>
           </Box>
 
-          {/* UNREVIEWED */}
+          {/* PENDING */}
           <Box
-            onClick={pendingassignmentclick}
+            onClick={pendingAssignmentClick}
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -286,7 +317,7 @@ function Sidebar({ username }) {
 
           {/* VIEW PROFILE */}
           <Box
-            onClick={viewprofilechange}
+            onClick={viewProfileChange}
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -318,6 +349,7 @@ function Sidebar({ username }) {
 
           {/* REQUESTS */}
           <Box
+            onClick = {handlerequest}
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -347,9 +379,9 @@ function Sidebar({ username }) {
             </Typography>
           </Box>
 
-          {/* CREATE GROUP */}
+          {/* MY GROUP */}
           <Box
-            onClick={handlemygroup} // ✅ Correct: attach onClick to the whole Box
+            onClick={handleMyGroup}
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -381,6 +413,7 @@ function Sidebar({ username }) {
 
           {/* JOIN GROUP */}
           <Box
+            onClick={handleOpen}
             sx={{
               display: "inline-flex",
               alignItems: "center",
@@ -410,39 +443,60 @@ function Sidebar({ username }) {
             </Typography>
           </Box>
 
-          {/* LOGOUT (already present below, keep as is) */}
+          {/* LOGOUT */}
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              paddingLeft: 4,
+              color: "white",
+              "&:hover": {
+                bgcolor: theme.palette.background.hovercolor,
+                cursor: "pointer",
+                color: theme.palette.cta.main,
+              },
+              paddingTop: 2,
+              paddingBottom: 2,
+            }}
+            onClick={handleLogout}
+          >
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 900,
+                color: "inherit",
+                fontFamily: "Inter",
+                fontSize: "17px",
+              }}
+            >
+              LOGOUT
+            </Typography>
+          </Box>
         </Box>
 
-        {/* Logout */}
-        <Box
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "10px",
-            paddingLeft: 4,
-            color: "white",
-            "&:hover": {
-              bgcolor: theme.palette.background.hovercolor,
-              cursor: "pointer",
-              color: theme.palette.cta.main,
-            },
-            paddingTop: 2,
-            paddingBottom: 2,
-          }}
-          onClick={handleLogout}
-        >
-          <Typography
-            variant="h3"
-            sx={{
-              fontWeight: 900,
-              color: "inherit",
-              fontFamily: "Inter",
-              fontSize: "17px",
-            }}
-          >
-            LOGOUT
-          </Typography>
-        </Box>
+        {/* JOIN GROUP DIALOG */}
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Join Group</DialogTitle>
+          <form onSubmit={handleJoining}>
+            <DialogContent>
+              <TextField
+                label="Enter Group ID"
+                type="text"
+                value={formval}
+                onChange={handleOnChange}
+                fullWidth
+                required
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose}>Cancel</Button>
+              <Button type="submit" variant="contained" color="cta">
+                Join
+              </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
       </Box>
     </ThemeProvider>
   );

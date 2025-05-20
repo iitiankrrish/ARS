@@ -1,10 +1,11 @@
 const express = require('express');
 const {UserLoggedInOrNot} = require('../middlewares/authorisation');
-const { handleSignUp, handleLogIn, handleLogOut ,askForReview , getuserbyid} = require('../controllers/user');
+const { handleSignUp, handleLogIn, handleLogOut ,askForReview , getuserbyid , gettagging}  = require('../controllers/user');
 const router = express.Router();
 router.post('/signup',handleSignUp);
 router.post('/login',handleLogIn);
 router.post('/logout',handleLogOut);
 router.post('/reviewRequestToReviewer',UserLoggedInOrNot,askForReview);
 router.post('/getuserbyid/:userId',UserLoggedInOrNot,getuserbyid);
+router.post('/gettagging',UserLoggedInOrNot,gettagging);
 module.exports = router;

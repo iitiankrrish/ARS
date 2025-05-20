@@ -2,80 +2,83 @@ const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const Reviewer = require("../models/reviewer");
 const Assignment = require("../models/assignment");
-const ReviewRequest = require("../models/reviewRequestStorage")
+const ReviewRequest = require("../models/reviewRequestStorage");
+
 const { setUser } = require("../services/auth");
 
-async function handleSignUp(req, res) {ss
-    try {
-        const { name, username, password, phoneNumber, email ,role } = req.body;
+async function handleSignUp(req, res) {
+  try {
+    const { name, username, password, phoneNumber, email, role } = req.body;
 
-        // Check if email already exists
-        const preExistingEmail = await User.findOne({ email });
-        if (preExistingEmail) {
-            return res.status(400).json({ "Error": "Email already exists" });
-        }
-
-        // Check if phone number already exists
-        const preExistingPhoneNumber = await User.findOne({ phoneNumber });
-        if (preExistingPhoneNumber) {
-            return res.status(400).json({ "Error": "Phone Number already exists" });
-        }
-        const userRole = role||"reviewee";
-        // Hash the password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // Create user in the database
-        await User.create({
-            name,
-            username,
-            password: hashedPassword,
-            phoneNumber,
-            email,
-            role: userRole
-        });
-
-        return res.status(201).json({ "Success": "You have been Signed Up successfully" });
-    } catch (error) {
-        console.error("Error in sign-up:", error);
-        return res.status(500).json({ "Error": "Internal Server Error" });
+    // Check if email already exists
+    const preExistingEmail = await User.findOne({ email });
+    if (preExistingEmail) {
+      return res.status(400).json({ Error: "Email already exists" });
     }
+
+    // Check if phone number already exists
+    const preExistingPhoneNumber = await User.findOne({ phoneNumber });
+    if (preExistingPhoneNumber) {
+      return res.status(400).json({ Error: "Phone Number already exists" });
+    }
+    const userRole = role || "reviewee";
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create user in the database
+    await User.create({
+      name,
+      username,
+      password: hashedPassword,
+      phoneNumber,
+      email,
+      role: userRole,
+    });
+
+    return res
+      .status(201)
+      .json({ Success: "You have been Signed Up successfully" });
+  } catch (error) {
+    console.error("Error in sign-up:", error);
+    return res.status(500).json({ Error: "Internal Server Error" });
+  }
 }
 async function handleLogIn(req, res) {
-    try {
-        const { email, phoneNumber, password } = req.body;
+  try {
+    const { email, phoneNumber, password } = req.body;
 
-        // Find the user in the database
-        const currentUser = await User.findOne({ email, phoneNumber });
+    // Find the user in the database
+    const currentUser = await User.findOne({ email, phoneNumber });
 
-        if (!currentUser) {
-            return res.status(400).json({ "Error": "Invalid email or phone number" });
-        }
-
-        // Compare the password
-        const isMatch = await bcrypt.compare(password, currentUser.password);
-        if (!isMatch) {
-            return res.status(400).json({ "Error": "Invalid Password" });
-        }
-
-        // Generate token
-        const token = setUser(currentUser);
-
-        // Set cookie
-        res.cookie("loginToken", token, {
-            maxAge: 86400000, // 1 day
-            httpOnly: true
-        });
-
-        res.json({ "Success": "Successfully logged into your account" });
-    } catch (error) {
-        console.error("Error in login:", error);
-        res.status(500).json({ "Error": "Internal Server Error" });
+    if (!currentUser) {
+      return res.status(400).json({ Error: "Invalid email or phone number" });
     }
+
+    // Compare the password
+    const isMatch = await bcrypt.compare(password, currentUser.password);
+    if (!isMatch) {
+      return res.status(400).json({ Error: "Invalid Password" });
+    }
+
+    // Generate token
+    const token = setUser(currentUser);
+
+    // Set cookie
+    res.cookie("loginToken", token, {
+      maxAge: 86400000, // 1 day
+      httpOnly: true,
+    });
+
+    res.json({ Success: "Successfully logged into your account" });
+  } catch (error) {
+    console.error("Error in login:", error);
+    res.status(500).json({ Error: "Internal Server Error" });
+  }
 }
 async function handleLogOut(req, res) {
-    res.clearCookie("loginToken");
-    res.status(200).json({ "Success": "Logged Out Successfully" });
+  res.clearCookie("loginToken");
+  res.status(200).json({ Success: "Logged Out Successfully" });
 }
 async function askForReview(req, res) {
   try {
@@ -85,7 +88,6 @@ async function askForReview(req, res) {
     // Validate assignment and student existence
     const assignment = await Assignment.findById(assignmentId);
     const reviewee = await User.findById(studentId);
-
     if (!assignment || !reviewee) {
       return res.status(404).json({ error: "Assignment or student not found" });
     }
@@ -93,7 +95,9 @@ async function askForReview(req, res) {
     // Fetch reviewer mapping document
     const reviewerDoc = await Reviewer.findOne({ assignment: assignmentId });
     if (!reviewerDoc) {
-      return res.status(404).json({ error: "Reviewer mapping not found for this assignment" });
+      return res
+        .status(404)
+        .json({ error: "Reviewer mapping not found for this assignment" });
     }
 
     // Validate all reviewer IDs
@@ -125,17 +129,64 @@ async function askForReview(req, res) {
 
     await newReviewRequest.save();
 
-    return res.status(200).json({ success: "Review request created successfully" });
-
+    return res
+      .status(200)
+      .json({ success: "Review request created successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-async function getuserbyid(req,res){
-  const {userId} = req.params;
+async function gettagging(req, res) {
+  try {
+    const userId = req.user._id;
+    const role = req.user.role;
+
+    // Fetch all review requests from DB
+    const allRequests = await ReviewRequest.find({});
+
+    if (role === "reviewee") {
+      const myrequests = [];
+      for (const request of allRequests) {
+        console.log(request);
+        console.log(userId)
+        if (request.revieweeRequesting.toString() === userId.toString()) {
+          myrequests.push(request);
+        }
+      }
+      return res.json(myrequests);
+    } else if (role === "reviewer") {
+      const requestedtome = [];
+      for (const request of allRequests) {
+        // reviewerRequested is an array, check if userId exists inside it
+        for (const reviewerId of request.reviewerRequested) {
+          if (reviewerId.toString() === userId.toString()) {
+            requestedtome.push(request);
+            break; // no need to check more reviewers for this request
+          }
+        }
+      }
+      return res.json(requestedtome);
+    }
+
+    return res.status(400).json({ error: "Invalid role" });
+  } catch (error) {
+    console.error("Error in gettagging:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function getuserbyid(req, res) {
+  const { userId } = req.params;
   const userdata = await User.findById(userId);
-  if(!userdata) return res.json("no such user exists");
+  if (!userdata) return res.json("no such user exists");
   return res.json(userdata);
 }
-module.exports =  { handleSignUp, handleLogIn, handleLogOut ,askForReview , getuserbyid};
+module.exports = {
+  handleSignUp,
+  handleLogIn,
+  handleLogOut,
+  askForReview,
+  getuserbyid,
+  gettagging,
+};

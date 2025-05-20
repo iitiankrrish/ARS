@@ -147,10 +147,12 @@ function AssignmentToOpen() {
       });
 
       // 2. Request review from reviewers
-      await axios.post("/user/reviewRequestToReviewer", {
-        reviewerIds: selectedReviewerIds,
-        assignmentId: id,
-      });
+      if (selectedReviewerIds.length > 0) {
+        await axios.post("/user/reviewRequestToReviewer", {
+          reviewerIds: selectedReviewerIds,
+          assignmentId: id,
+        });
+      }
 
       alert("Submission successful!");
     } catch (error) {

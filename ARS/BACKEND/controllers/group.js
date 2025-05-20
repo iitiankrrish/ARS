@@ -9,7 +9,7 @@ async function joinGroup(req, res) {
     return res.status(400).json({ Error: "Group Id is required" });
   }
   try {
-const group = await Group.findById(groupId);
+const group = await Group.findOne({groupId});
     if (!group) {
       return res.status(404).json({ error: "Group not found." });
     }

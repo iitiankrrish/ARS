@@ -30,6 +30,7 @@ function App() {
       <Route path="/assignment/selectedassignment/:id" element={<AssignmentToOpen/>}></Route>
       <Route path="/group/particulargroup" element={<GroupToOpen/>}></Route>
       <Route path="/group/mygroup" element={<Allgroups />}></Route>
+      <Route path="/requests" element={<Request/>}></Route>
     </Routes>
       </>
   );
