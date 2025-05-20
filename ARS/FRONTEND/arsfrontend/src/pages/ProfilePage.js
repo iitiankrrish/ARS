@@ -1,4 +1,5 @@
 import Sidebar from "../components/Sidebar";
+import RSidebar from "../components/RSidebar";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "@fontsource/inter/900.css";
@@ -46,7 +47,7 @@ function Profile() {
   return (
     <>
       <Box sx={{ display: "flex" }}>
-        <Sidebar username={username} />
+{ userdata.role === "reviewee" ? <Sidebar username={userdata.username} /> : <RSidebar username={userdata.username} />}
         <main style={{ margin: "2rem" }}>
           <h1>Username: {username}</h1>
           <h1>Name: {name}</h1>

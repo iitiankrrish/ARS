@@ -11,22 +11,12 @@ async function createAssignment(req, res) {
   const {
     title,
     description,
-    assignedToGroup,
-    assignedToUser,
     dueDate,
     subtask,
   } = req.body;
 
   const createdBy = req.user._id;
 
-  if (
-    (!assignedToGroup || assignedToGroup.length === 0) &&
-    (!assignedToUser || assignedToUser.length === 0)
-  ) {
-    return res.status(400).json({
-      Error: "You need to assign the assignment to at least one group or user",
-    });
-  }
 
   if (!title || !description || !dueDate) {
     return res.status(400).json({
@@ -63,61 +53,61 @@ async function createAssignment(req, res) {
     const groupSubmissionStatus = [];
 
     // Handle multiple users (can be single ID or array)
-    const userArray = Array.isArray(assignedToUser)
-      ? assignedToUser
-      : [assignedToUser];
-    for (const userId of userArray.filter(Boolean)) {
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return res.status(400).json({ Error: `Invalid User ID: ${userId}` });
-      }
+    // const userArray = Array.isArray(assignedToUser)
+    //   ? assignedToUser
+    //   : [assignedToUser];
+    // for (const userId of userArray.filter(Boolean)) {
+    //   if (!mongoose.Types.ObjectId.isValid(userId)) {
+    //     return res.status(400).json({ Error: `Invalid User ID: ${userId}` });
+    //   }
 
-      const student = await User.findById(userId);
-      if (!student) {
-        return res.status(404).json({ Error: `User not found: ${userId}` });
-      }
+      // const student = await User.findById(userId);
+      // if (!student) {
+      //   return res.status(404).json({ Error: `User not found: ${userId}` });
+      // }
 
-      if (student.role !== "reviewee") {
-        return res
-          .status(400)
-          .json({
-            Error: `User ${student.name || student._id} is not a reviewee`,
-          });
-      }
+    //   if (student.role !== "reviewee") {
+    //     return res
+    //       .status(400)
+    //       .json({
+    //         Error: `User ${student.name || student._id} is not a reviewee`,
+    //       });
+    //   }
 
-      membersStatus.push({
-        userId: student._id,
-        status: "pending",
-        reviews: [],
-      });
-    }
+    //   membersStatus.push({
+    //     userId: student._id,
+    //     status: "pending",
+    //     reviews: [],
+    //   });
+    // }
 
     // Handle multiple groups (can be single ID or array)
-    const groupArray = Array.isArray(assignedToGroup)
-      ? assignedToGroup
-      : [assignedToGroup];
-    for (const groupId of groupArray.filter(Boolean)) {
-      if (!mongoose.Types.ObjectId.isValid(groupId)) {
-        return res.status(400).json({ Error: `Invalid Group ID: ${groupId}` });
-      }
+    // const groupArray = Array.isArray(assignedToGroup)
+    //   ? assignedToGroup
+    //   : [assignedToGroup];
+    // for (const groupId of groupArray.filter(Boolean)) {
+    //   if (!mongoose.Types.ObjectId.isValid(groupId)) {
+    //     return res.status(400).json({ Error: `Invalid Group ID: ${groupId}` });
+    //   }
 
-      const group = await Group.findById(groupId);
-      if (!group) {
-        return res.status(404).json({ error: `Group not found: ${groupId}` });
-      }
+    //   const group = await Group.findById(groupId);
+    //   if (!group) {
+    //     return res.status(404).json({ error: `Group not found: ${groupId}` });
+    //   }
 
-      groupSubmissionStatus.push({
-        groupId: group._id,
-        status: "pending",
-        reviews: [],
-      });
-    }
+    //   groupSubmissionStatus.push({
+    //     groupId: group._id,
+    //     status: "pending",
+    //     reviews: [],
+    //   });
+    // }
 
     // Create the assignment
     const newAssignment = await Assignment.create({
       title,
       description,
-      assignedToGroup: groupArray.length > 0 ? groupArray : undefined,
-      assignedToUser: userArray.length > 0 ? userArray : undefined,
+      // assignedToGroup: groupArray.length > 0 ? groupArray : undefined,
+      // assignedToUser: userArray.length > 0 ? userArray : undefined,
       assignedDate,
       dueDate,
       membersStatus,

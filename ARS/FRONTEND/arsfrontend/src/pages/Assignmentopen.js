@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
+import RSidebar from "../components/RSidebar";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import {
@@ -178,7 +179,7 @@ function AssignmentToOpen() {
         height: "100vh",
       }}
     >
-      <Sidebar username={userdata.username} />
+     { userdata.role === "reviewee" ? <Sidebar username={userdata.username} /> : <RSidebar username={userdata.username} />}
 
       <Box sx={{ margin: 2, marginLeft: 5 }}>
         <Typography variant="h2" sx={{ fontWeight: 800 }}>

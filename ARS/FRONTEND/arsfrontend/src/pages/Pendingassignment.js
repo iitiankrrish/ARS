@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
+import RSidebar from "../components/RSidebar";
 import AssgnCard from "../components/Card"; // Make sure this is AssgnCard
 import { Box } from "@mui/material";
 
@@ -35,7 +36,7 @@ function Pendingassignment() {
 
   return (
     <Box sx={{ display: "flex", width: "100vw", bgcolor: "#121212" }}>
-      <Sidebar username={username} />
+{ userdata.role === "reviewee" ? <Sidebar username={userdata.username} /> : <RSidebar username={userdata.username} />}
       <Box
         sx={{
           flexGrow: 1,

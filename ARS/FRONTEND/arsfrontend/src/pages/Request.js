@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
+import RSidebar from "../components/RSidebar";
 import { Box } from "@mui/material";
 
 function Request() {
@@ -106,7 +107,7 @@ function Request() {
 
   return (
     <Box sx={{ display: "flex", width: "100vw", bgcolor: "#121212" }}>
-      <Sidebar username={userdata.username} />
+{ userdata.role === "reviewee" ? <Sidebar username={userdata.username} /> : <RSidebar username={userdata.username} />}
       <Box sx={{ p: 2, color: "white" }}>
         {displayRequests.length === 0 ? (
           <p>No valid requests found</p>

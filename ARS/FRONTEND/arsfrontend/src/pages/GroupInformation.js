@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import Sidebar from "../components/Sidebar";
+import RSidebar from "../components/RSidebar";
 import axios from "axios";
 
 function GroupToOpen() {
@@ -103,7 +104,8 @@ function GroupToOpen() {
 
   return (
     <Box sx={{ display: "flex", bgcolor: "#121212", color: "#fff", minHeight: "100vh" }}>
-      <Sidebar username={userdata.username} />
+      { userdata.role === "reviewee" ? <Sidebar username={userdata.username} /> : <RSidebar username={userdata.username} />}
+
 
       <Box sx={{ flexGrow: 1, padding: 4 }}>
         <Typography variant="h3" fontWeight={800}>

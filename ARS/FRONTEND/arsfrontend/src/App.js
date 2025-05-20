@@ -13,6 +13,7 @@ import Pendingassignment from "./pages/Pendingassignment";
 import AssignmentToOpen from './pages/Assignmentopen';
 import Groupcard from "./components/Groupcard";
 import Allgroups from './pages/Mygroups';
+import CreateAssignmentForm from "./pages/Createassignment";
 import GroupToOpen from "./pages/GroupInformation";
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
       <Route path="/group/particulargroup" element={<GroupToOpen/>}></Route>
       <Route path="/group/mygroup" element={<Allgroups />}></Route>
       <Route path="/requests" element={<Request/>}></Route>
+      <Route path="/createassignment" element={<CreateAssignmentForm/>}></Route>
     </Routes>
       </>
   );
