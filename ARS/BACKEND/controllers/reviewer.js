@@ -150,14 +150,15 @@ async function giveReviewTheAssignmentAndNotAcceptIt(req, res) {
         .status(404)
         .json({ error: "Student and Group not found in this assignment" });
     }
-    if(!group){
+    if (!group) {
       if (student.status != "submitted") {
         return res.json({
-          Error: "You cannot review a pre-evaluated or an unsubmitted assignment",
+          Error:
+            "You cannot review a pre-evaluated or an unsubmitted assignment",
         });
       }
       assignment.reviewCount = assignment.reviewCount + 1;
-  
+
       // Add review to student's reviews
       student.reviews.push({
         reviewerId,
@@ -165,18 +166,19 @@ async function giveReviewTheAssignmentAndNotAcceptIt(req, res) {
         iterationNumber,
         reviewedAt: new Date(),
       });
-  
+
       student.status = "pending"; // Mark status as pending
       await assignment.save();
     }
-    if(!student){
+    if (!student) {
       if (group.status != "submitted") {
         return res.json({
-          Error: "You cannot review a pre-evaluated or an unsubmitted assignment",
+          Error:
+            "You cannot review a pre-evaluated or an unsubmitted assignment",
         });
       }
       assignment.reviewCount = assignment.reviewCount + 1;
-  
+
       // Add review to student's reviews
       group.reviews.push({
         reviewerId,
@@ -184,11 +186,10 @@ async function giveReviewTheAssignmentAndNotAcceptIt(req, res) {
         iterationNumber,
         reviewedAt: new Date(),
       });
-  
+
       group.status = "pending"; // Mark status as pending
       await assignment.save();
     }
-
 
     res.status(200).json({ success: "Review submitted successfully" });
   } catch (error) {
@@ -219,20 +220,22 @@ async function acceptTheAssignment(req, res) {
         .status(404)
         .json({ error: "Student and Group not found in this assignment" });
     }
-    if(!group){
+    if (!group) {
       if (student.status != "submitted") {
         return res.json({
-          Error: "You cannot review a pre-evaluated or an unsubmitted assignment",
+          Error:
+            "You cannot review a pre-evaluated or an unsubmitted assignment",
         });
       }
 
       student.status = "accepted"; // Mark as accepted
       await assignment.save();
     }
-    if(!student){
+    if (!student) {
       if (group.status != "submitted") {
         return res.json({
-          Error: "You cannot review a pre-evaluated or an unsubmitted assignment",
+          Error:
+            "You cannot review a pre-evaluated or an unsubmitted assignment",
         });
       }
 
@@ -286,11 +289,43 @@ async function getReviewerForParticularAssignment(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+async function getAssignmentForThatParticularReviewer(req, res) {
+  try {
+    const userId = req.user._id;
+    const reviewersdoc = await Reviewer.find({});
+
+    const myassignments = [];
+    const seenAssignmentIds = new Set();
+
+    for (const object of reviewersdoc) {
+      for (const reviewer of object.reviewers) {
+        if (reviewer.userId.toString() === userId.toString()) {
+          const assignmentId = object.assignment.toString();
+          if (!seenAssignmentIds.has(assignmentId)) {
+            const assignment = await Assignment.findById(assignmentId);
+            if (assignment) {
+              myassignments.push(assignment);
+              seenAssignmentIds.add(assignmentId);
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    return res.json(myassignments);
+  } catch (err) {
+    console.error("Error in getAssignmentForThatParticularReviewer:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 
 module.exports = {
   sendRequest,
   responseToRequest,
   giveReviewTheAssignmentAndNotAcceptIt,
   acceptTheAssignment,
-  getReviewerForParticularAssignment
+  getReviewerForParticularAssignment,
+  getAssignmentForThatParticularReviewer,
 };
